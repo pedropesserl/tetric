@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g -Wextra
+CLAGS = -Wall -g -Wextra
 
 all: prod debug
 
@@ -7,3 +7,6 @@ prod: tetric.c
 
 debug: tetric.c
 	gcc -DDEBUG_FLAG $(CFLAGS) -o debug tetric.c
+
+clean:
+	rm prod debug
