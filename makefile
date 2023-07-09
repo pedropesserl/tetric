@@ -1,12 +1,21 @@
-CLAGS = -Wall -g -Wextra
+CC = gcc
+CFLAGS = -Wall -g -Wextra
+OBJ = tetric.o
+DEPS =
 
-all: prod debug
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-prod: tetric.c
-	gcc $(CFLAGS) -o prod tetric.c
+all: tetric debug
+
+tetric: $(OBJ)
+	$(CC) -o $@ $^
 
 debug: tetric.c
-	gcc -DDEBUG_FLAG $(CFLAGS) -o debug tetric.c
+	$(CC) -DDEBUG_FLAG -o $@ $^ $(CFLAGS)
 
 clean:
-	rm prod debug
+	rm -f $(OBJ)
+
+purge:
+	rm -f $(OBJ) tetric debug
