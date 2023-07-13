@@ -1,21 +1,18 @@
 CC = gcc
 CFLAGS = -Wall -g -Wextra
-OBJ = tetric.o
-DEPS =
+OBJ = src/tetric.o src/libtermio.o src/matrix.o src/piece.o
+DEPS = src/libtermio.h src/matrix.h src/piece.h
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: tetric debug
+all: tetric
 
 tetric: $(OBJ)
 	$(CC) -o $@ $^
-
-debug: tetric.c
-	$(CC) -DDEBUG_FLAG -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f $(OBJ)
 
 purge:
-	rm -f $(OBJ) tetric debug
+	rm -f $(OBJ) tetric
