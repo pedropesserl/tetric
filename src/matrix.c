@@ -54,21 +54,17 @@ static void swap(int *a, int *b) {
 void rotate_left(int m[SZ][SZ]) {
     for (int i = 0; i < SZ/2; i++)
         for (int j = i; j < SZ-1-i; j++) {
-            int tmp = m[j][SZ-1-i];
-            swap(&tmp, &(m[i][j]));
-            swap(&tmp, &(m[SZ-1-j][i]));
-            swap(&tmp, &(m[SZ-1-i][SZ-1-j]));
-            swap(&tmp, &(m[j][SZ-1-i]));
+            swap(&(m[j][SZ-1-i]), &(m[i][j]));
+            swap(&(m[j][SZ-1-i]), &(m[SZ-1-j][i]));
+            swap(&(m[j][SZ-1-i]), &(m[SZ-1-i][SZ-1-j]));
         }
 }
 
 void rotate_right(int m[SZ][SZ]) {
     for (int i = 0; i < SZ/2; i++)
         for (int j = i; j < SZ-1-i; j++) {
-            int tmp = m[i][j];
-            swap(&tmp, &(m[j][SZ-1-i]));
-            swap(&tmp, &(m[SZ-1-i][SZ-1-j]));
-            swap(&tmp, &(m[SZ-1-j][i]));
-            swap(&tmp, &(m[i][j]));
+            swap(&(m[i][j]), &(m[j][SZ-1-i]));
+            swap(&(m[i][j]), &(m[SZ-1-i][SZ-1-j]));
+            swap(&(m[i][j]), &(m[SZ-1-j][i]));
         }
 }
