@@ -45,13 +45,30 @@ int rightmost_column(int m[SZ][SZ]) {
     return -1;
 }
 
-
-
-void rotate_left(int (*m)[SZ][SZ]) {
-    (*m)[2][2] = 1;
-    fprintf(stderr, "rotate_left: nao implementada (matrix.c)\n");
+static void swap(int *a, int *b) {
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
 }
 
-void rotate_right(int (*m)[SZ][SZ]) {
-    fprintf(stderr, "rotate_right: nao implementada (matrix.c)\n");
+void rotate_left(int m[SZ][SZ]) {
+    for (int i = 0; i < SZ/2; i++)
+        for (int j = i; j < SZ-1-i; j++) {
+            int tmp = m[j][SZ-1-i];
+            swap(&tmp, &(m[i][j]));
+            swap(&tmp, &(m[SZ-1-j][i]));
+            swap(&tmp, &(m[SZ-1-i][SZ-1-j]));
+            swap(&tmp, &(m[j][SZ-1-i]));
+        }
+}
+
+void rotate_right(int m[SZ][SZ]) {
+    for (int i = 0; i < SZ/2; i++)
+        for (int j = i; j < SZ-1-i; j++) {
+            int tmp = m[i][j];
+            swap(&tmp, &(m[j][SZ-1-i]));
+            swap(&tmp, &(m[SZ-1-i][SZ-1-j]));
+            swap(&tmp, &(m[SZ-1-j][i]));
+            swap(&tmp, &(m[i][j]));
+        }
 }
