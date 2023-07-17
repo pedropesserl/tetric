@@ -26,8 +26,8 @@ int next_position_is_valid(int board[BDROWS][BDCOLS], Piece p);
 
 Piece new_piece(int type, float fall_time);
 
-void turn_left(Piece p);
+void turn_left(Piece *p);
 
-void turn_right(Piece p);
+void turn_right(Piece *p);
 
 #endif // PIECE_H_

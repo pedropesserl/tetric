@@ -112,6 +112,13 @@ int main(void) {
             cursor_up(22);
             cursor_left(29);
 
+            if (kb_hit()) {
+                switch (fgetc(stdin)) {
+                    case 'a': turn_left(&piece); break;
+                    default: break;
+                }
+            }
+
             /* now = clock(); */
             /* if (((double)now - start)/CLOCKS_PER_SEC >= piece.fall_time) */
             /*     piece.posv++; */

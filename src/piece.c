@@ -72,14 +72,14 @@ Piece new_piece(int type, float fall_time) {
     return p;
 }
 
-void turn_left(Piece p) {
-    if (p.type == O)
+void turn_left(Piece *p) {
+    if (p->type == O)
         return;
-    rotate_left(p.matrix, p.type == I ? 4 : 3);
+    rotate_left(p->matrix, p->type == I ? 4 : 3);
 }
 
-void turn_right(Piece p) {
-    if (p.type == O)
+void turn_right(Piece *p) {
+    if (p->type == O)
         return;
-    rotate_right(p.matrix, p.type == I ? 4 : 3);
+    rotate_right(p->matrix, p->type == I ? 4 : 3);
 }
