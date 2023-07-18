@@ -68,3 +68,15 @@ void rotate_right(int m[MAX][MAX], int sz) {
             swap(&(m[i][j]), &(m[sz-1-j][i]));
         }
 }
+
+void reflect_horizontal(int m[MAX][MAX], int sz) {
+    for (int i = 0; i < sz/2; i++)
+        for (int j = 0; j < sz; j++)
+            swap(&(m[i][j]), &(m[sz-1-i][j]));
+}
+
+void reflect_vertical(int m[MAX][MAX], int sz) {
+    for (int i = 0; i < sz; i++)
+        for (int j = 0; j < sz/2; j++)
+            swap(&(m[i][j]), &(m[i][sz-1-j]));
+}

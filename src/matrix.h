@@ -17,4 +17,8 @@ void rotate_left(int m[MAX][MAX], int sz);
 
 void rotate_right(int m[MAX][MAX], int sz);
 
+void reflect_horizontal(int m[MAX][MAX], int sz);
+
+void reflect_vertical(int m[MAX][MAX], int sz);
+
 #endif // MATRIX_H_

@@ -21,16 +21,24 @@
                                            \
 } while(0)
 
-void print_board(int board[BDROWS][BDCOLS]) {
+void initialize_screen() {
     printf("\033[48;5;234m"); // grey background
     printf("    ┏━━━━━━━━━━━━━━━━━━━━┓    \n");
-
     for (int i = 0; i < BDROWS; i++) {
         printf("    ┃");
-        for (int j = 0; j < BDCOLS; j++) {
+        for (int j = 0; j < BDCOLS; j++)
+            printf("  ");
+        printf("┃    \n");
+    }
+    printf("    ┗━━━━━━━━━━━━━━━━━━━━┛    \n");
+}
+
+void render_board(int board[BDROWS][BDCOLS]) {
+    for (int i = 0; i < BDROWS; i++) {
+        for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
                 case (EMPTY):
-                    printf("  ");
+                    printf("\033[48;5;234m  ");
                     break;
                 case (I):
                     printf("\033[48;5;51m  ");  // cyan
@@ -61,10 +69,10 @@ void print_board(int board[BDROWS][BDCOLS]) {
                     printf("\033[48;5;234m");
                     break;
             }
-        }
-        printf("┃    \n");
+        cursor_down(1);
+        cursor_left(BDCOLS*2);
     }
-    printf("    ┗━━━━━━━━━━━━━━━━━━━━┛    \n");
+    cursor_up(BDROWS);
 }
 
 int quit = 0;
@@ -75,61 +83,61 @@ int main(void) {
     srand(time(NULL));
     struct termios curr_config;
     disable_canonical_stdin(&curr_config);
-    /* clock_t start, now; */
+    hide_cursor();
+    clock_t start, now;
+
+    initialize_screen();
+    cursor_up(21);
+    cursor_right(5);
 
     while (!quit) {
-        Piece piece = new_piece(rand() % 7 + 1, 0.1);
+        Piece piece = new_piece(rand() % 7 + 1, 0.3);
+        Piece piece_held = {0};
         // INICIALIZAR PEÇA
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
                 if (piece.matrix[i][j] != EMPTY)
                     board[i][j + piece.posh] = piece.matrix[i][j];
 
-        print_board(board);
-        cursor_up(22);
-        cursor_left(29);
-        usleep(piece.fall_time * 1000 * 1000);
+        render_board(board);
 
         if (!next_position_is_valid(board, piece)) // encheu a tela
             quit = 1;
 
         // ATUALIZAR PEÇA
-        while (!quit && next_position_is_valid(board, piece)) {
-            /* start = clock(); */
-
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++)
-                    if (piece.matrix[i][j] != EMPTY)
-                        board[i+piece.posv][j+piece.posh] = EMPTY;
-
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++)
-                    if (piece.matrix[i][j] != EMPTY)
-                        board[i+piece.posv+1][j+piece.posh] = piece.matrix[i][j];
-
-            piece.posv++;
-            print_board(board);
-            cursor_up(22);
-            cursor_left(29);
-
+        start = clock();
+        while (next_position_is_valid(board, piece)) {
+            now = clock();
+            if (((double)now - start)/CLOCKS_PER_SEC >= piece.fall_time) {
+                start = clock();
+                now = clock();
+                update_falling_piece(board, &piece);
+                render_board(board);
+            }
             if (kb_hit()) {
                 switch (fgetc(stdin)) {
-                    case 'a': turn_left(&piece); break;
+                    case 'a': turn_left(&piece);         break;
+                    case 's': hold(&piece, &piece_held); break;
+                    case 'd': turn_right(&piece);        break;
+                    case 'f': turn_180(&piece);          break;
+                    case ' ': hard_drop(&piece);         break;
+                    case '\033': // arrow key
+                        fgetc(stdin); // first character after \033 is [
+                        switch (fgetc(stdin)) {
+                            case 'D': move_left(&piece);  break;
+                            case 'C': move_right(&piece); break;
+                            case 'B': soft_drop(&piece);  break;
+                        }
+                        break;
                     default: break;
                 }
             }
-
-            /* now = clock(); */
-            /* if (((double)now - start)/CLOCKS_PER_SEC >= piece.fall_time) */
-            /*     piece.posv++; */
-            usleep(piece.fall_time * 1000 * 1000);
-                
         }
-
     }
 
     set_stdin_flush(&curr_config);
     cursor_down(22);
+    show_cursor();
 
     return 0;
 }

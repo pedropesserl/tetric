@@ -26,8 +26,22 @@ int next_position_is_valid(int board[BDROWS][BDCOLS], Piece p);
 
 Piece new_piece(int type, float fall_time);
 
+void update_falling_piece(int board[BDROWS][BDCOLS], Piece *p);
+
 void turn_left(Piece *p);
 
 void turn_right(Piece *p);
+
+void turn_180(Piece *p);
+
+void hold(Piece *p, Piece *held);
+
+void move_left(Piece *p);
+
+void move_right(Piece *p);
+
+void soft_drop(Piece *p);
+
+void hard_drop(Piece *p);
 
 #endif // PIECE_H_

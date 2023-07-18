@@ -6,7 +6,7 @@ DEPS = src/libtermio.h src/matrix.h src/piece.h
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: tetric
+all: tetric clean
 
 tetric: $(OBJ)
 	$(CC) -o $@ $^
