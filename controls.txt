@@ -1,0 +1,8 @@
+a turn left
+d turn right
+s turn 180
+← move left
+→ move right
+↓ soft drop
+␣ hard drop
+! quit

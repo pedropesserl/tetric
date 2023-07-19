@@ -87,76 +87,97 @@ void render_board(int board[BDROWS][BDCOLS]) {
     cursor_up(BDROWS);
 }
 
+int process_keypress(char c, int board[BDROWS][BDCOLS], Piece *p, Piece *held) {
+    switch (c) {
+        case '!': return 0;             break;
+        case 'a': turn_left(board, p);  break;
+        case 's': hold(p, held);        break;
+        case 'd': turn_right(board, p); break;
+        case 'f': turn_180(board, p);   break;
+        case ' ': hard_drop(board, p);  break;
+        case '\033':      // arrow key
+              fgetc(stdin); // first character after \033 is [
+              switch (fgetc(stdin)) {
+                  case 'D': move_left(board, p);  break;
+                  case 'C': move_right(board, p); break;
+                  case 'B': soft_drop(p);         break;
+              }
+              break;
+        default: break;
+    }
+    return 1;
+}
+
+void quit(struct termios *term_config, int board[BDROWS][BDCOLS]) {
+    render_board(board);
+    set_stdin_flush(term_config);
+    cursor_down(22);
+    cursor_left(30);
+    show_cursor();
+    exit(0);
+}
+
 int main(void) {
-    struct termios curr_config;
-    disable_canonical_stdin(&curr_config);
+    struct termios term_config;
+    disable_canonical_stdin(&term_config);
     hide_cursor();
 
     int board[BDROWS][BDCOLS] = {0};
     srand(time(NULL));
-    clock_t fall_delay, fps, now;
+    clock_t fall_control, fps_control;
 
     initialize_screen();
     cursor_up(22);
     cursor_right(5);
 
     for (;;) {
-        fall_delay = clock();
-        fps = clock();
-        now = clock();
-        if (((double)now - fps)/CLOCKS_PER_SEC >= 1.0/FPS) {
-            fps = clock();
+        fall_control = clock();
+        fps_control = clock();
+        if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
+            fps_control = clock();
             render_board(board);
         }
 
-        Piece piece = new_piece(rand() % 7 + 1, 0.8);
+        Piece piece = new_piece(rand() % 7 + 1, 0.4);
         Piece piece_held = {0};
 
         stamp_piece(board, piece);
 
-        if (!down_is_valid(board, piece)) // encheu a tela
-            goto quit;
+        if (!down_is_valid(board, piece)) // filled screen
+            quit(&term_config, board);
 
-        // ATUALIZAR PEÇA
-        fall_delay = clock();
+        // UPDATE PIECE
+        fall_control = clock();
         while (down_is_valid(board, piece)) {
-            now = clock();
-            if (((double)now - fps)/CLOCKS_PER_SEC >= 1.0/FPS) {
-                fps = clock();
+piece_falling:
+            if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
+                fps_control = clock();
                 render_board(board);
             }
-            if (((double)now - fall_delay)/CLOCKS_PER_SEC >= piece.fall_time) {
-                fall_delay = clock();
+            if (((double)clock() - fall_control)/CLOCKS_PER_SEC >= piece.fall_time) {
+                fall_control = clock();
                 update_falling_piece(board, &piece);
             }
-            if (kb_hit()) {
-                switch (fgetc(stdin)) {
-                    case '!': goto quit;                 break;
-                    case 'a': turn_left(board, &piece);  break;
-                    case 's': hold(&piece, &piece_held); break;
-                    case 'd': turn_right(board, &piece); break;
-                    case 'f': turn_180(board, &piece);   break;
-                    case ' ': hard_drop(board, &piece);  break;
-                    case '\033': // arrow key
-                        fgetc(stdin); // first character after \033 is [
-                        switch (fgetc(stdin)) {
-                            case 'D': move_left(board, &piece);  break;
-                            case 'C': move_right(board, &piece); break;
-                            case 'B': soft_drop(&piece);         break;
-                        }
-                        break;
-                    default: break;
-                }
+            if (kb_hit())
+                if (process_keypress(fgetc(stdin), board, &piece, &piece_held) == 0)
+                    quit(&term_config, board);
+        }
+
+        // wiggle room after touching ground
+        fall_control = clock();
+        while (((double)clock() - fall_control)/CLOCKS_PER_SEC < piece.fall_time) {
+            if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
+                fps_control = clock();
+                render_board(board);
             }
+            if (kb_hit())
+                if (process_keypress(fgetc(stdin), board, &piece, &piece_held) == 0)
+                    quit(&term_config, board);
+
+            if (down_is_valid(board, piece)) // is now off of a ledge
+                goto piece_falling;
         }
     }
-
-quit:
-    render_board(board);
-    set_stdin_flush(&curr_config);
-    cursor_down(22);
-    cursor_left(30);
-    show_cursor();
 
     return 0;
 }
