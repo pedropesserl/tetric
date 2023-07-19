@@ -7,6 +7,8 @@
 #include "matrix.h"
 #include "piece.h"
 
+#define FPS 30.0
+
 #ifndef BDROWS
 #define BDROWS 20
 #endif
@@ -14,23 +16,33 @@
 #define BDCOLS 10
 #endif
 
-#define INITIALIZE_BOARD(grid) do {        \
-    for (int i = 0; i < BDROWS; i++)       \
-        for (int j = 0; j < BDCOLS; j++)   \
-            grid[i][j] = EMPTY;            \
-                                           \
-} while(0)
-
 void initialize_screen() {
     printf("\033[48;5;234m"); // grey background
-    printf("    ┏━━━━━━━━━━━━━━━━━━━━┓    \n");
-    for (int i = 0; i < BDROWS; i++) {
-        printf("    ┃");
-        for (int j = 0; j < BDCOLS; j++)
-            printf("  ");
-        printf("┃    \n");
-    }
-    printf("    ┗━━━━━━━━━━━━━━━━━━━━┛    \n");
+    
+    printf("                                            \n");
+    printf("    ┏━━━━━━━━━━━━━━━━━━━━┓    ┏━━━━━━━━┓    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┗━━━━━━━━┛    \n");
+    printf("    ┃                    ┃       HOLD       \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃    ┏━━━━━━━━┓    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┃        ┃    \n");
+    printf("    ┃                    ┃    ┗━━━━━━━━┛    \n");
+    printf("    ┃                    ┃       NEXT       \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┃                    ┃                  \n");
+    printf("    ┗━━━━━━━━━━━━━━━━━━━━┛                  \n");
+    printf("                                            \n");
 }
 
 void render_board(int board[BDROWS][BDCOLS]) {
@@ -75,58 +87,62 @@ void render_board(int board[BDROWS][BDCOLS]) {
     cursor_up(BDROWS);
 }
 
-int quit = 0;
-
 int main(void) {
-    int board[BDROWS][BDCOLS];
-    INITIALIZE_BOARD(board);
-    srand(time(NULL));
     struct termios curr_config;
     disable_canonical_stdin(&curr_config);
     hide_cursor();
-    clock_t start, now;
+
+    int board[BDROWS][BDCOLS] = {0};
+    srand(time(NULL));
+    clock_t fall_delay, fps, now;
 
     initialize_screen();
-    cursor_up(21);
+    cursor_up(22);
     cursor_right(5);
 
-    while (!quit) {
-        Piece piece = new_piece(rand() % 7 + 1, 0.3);
+    for (;;) {
+        fall_delay = clock();
+        fps = clock();
+        now = clock();
+        if (((double)now - fps)/CLOCKS_PER_SEC >= 1.0/FPS) {
+            fps = clock();
+            render_board(board);
+        }
+
+        Piece piece = new_piece(rand() % 7 + 1, 0.8);
         Piece piece_held = {0};
-        // INICIALIZAR PEÇA
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                if (piece.matrix[i][j] != EMPTY)
-                    board[i][j + piece.posh] = piece.matrix[i][j];
 
-        render_board(board);
+        stamp_piece(board, piece);
 
-        if (!next_position_is_valid(board, piece)) // encheu a tela
-            quit = 1;
+        if (!down_is_valid(board, piece)) // encheu a tela
+            goto quit;
 
         // ATUALIZAR PEÇA
-        start = clock();
-        while (next_position_is_valid(board, piece)) {
+        fall_delay = clock();
+        while (down_is_valid(board, piece)) {
             now = clock();
-            if (((double)now - start)/CLOCKS_PER_SEC >= piece.fall_time) {
-                start = clock();
-                now = clock();
-                update_falling_piece(board, &piece);
+            if (((double)now - fps)/CLOCKS_PER_SEC >= 1.0/FPS) {
+                fps = clock();
                 render_board(board);
+            }
+            if (((double)now - fall_delay)/CLOCKS_PER_SEC >= piece.fall_time) {
+                fall_delay = clock();
+                update_falling_piece(board, &piece);
             }
             if (kb_hit()) {
                 switch (fgetc(stdin)) {
-                    case 'a': turn_left(&piece);         break;
+                    case '!': goto quit;                 break;
+                    case 'a': turn_left(board, &piece);  break;
                     case 's': hold(&piece, &piece_held); break;
-                    case 'd': turn_right(&piece);        break;
-                    case 'f': turn_180(&piece);          break;
-                    case ' ': hard_drop(&piece);         break;
+                    case 'd': turn_right(board, &piece); break;
+                    case 'f': turn_180(board, &piece);   break;
+                    case ' ': hard_drop(board, &piece);  break;
                     case '\033': // arrow key
                         fgetc(stdin); // first character after \033 is [
                         switch (fgetc(stdin)) {
-                            case 'D': move_left(&piece);  break;
-                            case 'C': move_right(&piece); break;
-                            case 'B': soft_drop(&piece);  break;
+                            case 'D': move_left(board, &piece);  break;
+                            case 'C': move_right(board, &piece); break;
+                            case 'B': soft_drop(&piece);         break;
                         }
                         break;
                     default: break;
@@ -135,8 +151,11 @@ int main(void) {
         }
     }
 
+quit:
+    render_board(board);
     set_stdin_flush(&curr_config);
     cursor_down(22);
+    cursor_left(30);
     show_cursor();
 
     return 0;

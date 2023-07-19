@@ -17,31 +17,47 @@
 
 typedef struct Piece {
     int type;
-    int matrix[4][4];
+    int matrix[MAX][MAX];
     float fall_time;
     int posv, posh; // position of matrix's upper-left corner relative to board
 } Piece;
 
-int next_position_is_valid(int board[BDROWS][BDCOLS], Piece p);
+void clear_piece(int board[BDROWS][BDCOLS], Piece p);
+
+void stamp_piece(int board[BDROWS][BDCOLS], Piece p);
+
+int boundaries_are_valid(Piece p);
+
+int piece_board_collision(int board[BDROWS][BDCOLS], Piece p);
+
+int down_is_valid(int board[BDROWS][BDCOLS], Piece p);
+
+int left_is_valid(int board[BDROWS][BDCOLS], Piece p);
+
+int right_is_valid(int board[BDROWS][BDCOLS], Piece p);
+
+int turn_left_is_valid(int board[BDROWS][BDCOLS], Piece p);
+
+int turn_right_is_valid(int board[BDROWS][BDCOLS], Piece p);
 
 Piece new_piece(int type, float fall_time);
 
 void update_falling_piece(int board[BDROWS][BDCOLS], Piece *p);
 
-void turn_left(Piece *p);
+void turn_left(int board[BDROWS][BDCOLS], Piece *p);
 
-void turn_right(Piece *p);
+void turn_right(int board[BDROWS][BDCOLS], Piece *p);
 
-void turn_180(Piece *p);
+void turn_180(int board[BDROWS][BDCOLS], Piece *p);
 
 void hold(Piece *p, Piece *held);
 
-void move_left(Piece *p);
+void move_left(int board[BDROWS][BDCOLS], Piece *p);
 
-void move_right(Piece *p);
+void move_right(int board[BDROWS][BDCOLS], Piece *p);
 
 void soft_drop(Piece *p);
 
-void hard_drop(Piece *p);
+void hard_drop(int board[BDROWS][BDCOLS], Piece *p);
 
 #endif // PIECE_H_
