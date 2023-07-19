@@ -1,0 +1,12 @@
+- wait a bit before settling piece in place
+- view next piece
+- hold current piece
+- clear full rows
+
+for later:
+- points system
+- levels system
+- increase falling speed according to current level
+- improve rotation system
+  - wall kick
+  - maybe full blown SRS? (way in the future)
