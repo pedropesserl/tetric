@@ -16,6 +16,8 @@
 #define BDCOLS 10
 #endif
 
+int boardx = 0, boardy = 0, holdx = 0, holdy = 0, nextx = 0, nexty = 0;
+
 void initialize_screen() {
     printf("\033[48;5;234m"); // grey background
     
@@ -87,27 +89,6 @@ void render_board(int board[BDROWS][BDCOLS]) {
     cursor_up(BDROWS);
 }
 
-int process_keypress(char c, int board[BDROWS][BDCOLS], Piece *p, Piece *held) {
-    switch (c) {
-        case '!': return 0;             break;
-        case 'a': turn_left(board, p);  break;
-        case 's': hold(p, held);        break;
-        case 'd': turn_right(board, p); break;
-        case 'f': turn_180(board, p);   break;
-        case ' ': hard_drop(board, p);  break;
-        case '\033':      // arrow key
-              fgetc(stdin); // first character after \033 is [
-              switch (fgetc(stdin)) {
-                  case 'D': move_left(board, p);  break;
-                  case 'C': move_right(board, p); break;
-                  case 'B': soft_drop(p);         break;
-              }
-              break;
-        default: break;
-    }
-    return 1;
-}
-
 void quit(struct termios *term_config, int board[BDROWS][BDCOLS]) {
     render_board(board);
     set_stdin_flush(term_config);
@@ -115,6 +96,28 @@ void quit(struct termios *term_config, int board[BDROWS][BDCOLS]) {
     cursor_left(30);
     show_cursor();
     exit(0);
+}
+
+int process_keypress(char c, struct termios *term_config,
+                     int board[BDROWS][BDCOLS], Piece *p, Piece *held) {
+    switch (c) {
+        case '!': quit(term_config, board); break;
+        case 'a': turn_left(board, p);      break;
+        case 's': hold(p, held);            break;
+        case 'd': turn_right(board, p);     break;
+        case 'f': turn_180(board, p);       break;
+        case ' ': hard_drop(board, p);      break;
+        case '\033':      // arrow key
+                  fgetc(stdin); // first character after \033 is [
+                  switch (fgetc(stdin)) {
+                      case 'D': move_left(board, p);  break;
+                      case 'C': move_right(board, p); break;
+                      case 'B': soft_drop(p);         break;
+                  }
+                  break;
+        default: break;
+    }
+    return 1;
 }
 
 int main(void) {
@@ -130,6 +133,8 @@ int main(void) {
     cursor_up(22);
     cursor_right(5);
 
+    Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, 0.4);
+
     for (;;) {
         fall_control = clock();
         fps_control = clock();
@@ -138,8 +143,9 @@ int main(void) {
             render_board(board);
         }
 
-        Piece piece = new_piece(rand() % 7 + 1, 0.4);
-        Piece piece_held = {0};
+        piece = next_piece;
+        next_piece = new_piece(rand() % 7 + 1, 0.4);
+        piece_held = {0};
 
         stamp_piece(board, piece);
 
@@ -159,8 +165,7 @@ piece_falling:
                 update_falling_piece(board, &piece);
             }
             if (kb_hit())
-                if (process_keypress(fgetc(stdin), board, &piece, &piece_held) == 0)
-                    quit(&term_config, board);
+                process_keypress(fgetc(stdin), &term_config, board, &piece, &piece_held);
         }
 
         // wiggle room after touching ground
@@ -171,8 +176,7 @@ piece_falling:
                 render_board(board);
             }
             if (kb_hit())
-                if (process_keypress(fgetc(stdin), board, &piece, &piece_held) == 0)
-                    quit(&term_config, board);
+                process_keypress(fgetc(stdin), &term_config, board, &piece, &piece_held);
 
             if (down_is_valid(board, piece)) // is now off of a ledge
                 goto piece_falling;
