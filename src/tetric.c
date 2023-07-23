@@ -16,38 +16,73 @@
 #define BDCOLS 10
 #endif
 
-int boardx = 0, boardy = 0, holdx = 0, holdy = 0, nextx = 0, nexty = 0;
+typedef struct Coord {
+    int x, y;
+} Coord;
 
-void initialize_screen() {
-    printf("\033[48;5;234m"); // grey background
-    
-    printf("                                            \n");
-    printf("    ┏━━━━━━━━━━━━━━━━━━━━┓    ┏━━━━━━━━┓    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┗━━━━━━━━┛    \n");
-    printf("    ┃                    ┃       HOLD       \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃    ┏━━━━━━━━┓    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┃        ┃    \n");
-    printf("    ┃                    ┃    ┗━━━━━━━━┛    \n");
-    printf("    ┃                    ┃       NEXT       \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┃                    ┃                  \n");
-    printf("    ┗━━━━━━━━━━━━━━━━━━━━┛                  \n");
-    printf("                                            \n");
+/* int boardx = 0, boardy = 0, holdx = 0, holdy = 0, nextx = 0, nexty = 0; */
+
+static void pad_line(const char *line, int left_pad, int right_pad) {
+    for (int j = 0; j < left_pad; j++) printf(" ");
+    printf("%s", line);
+    for (int j = 0; j < right_pad; j++) printf(" ");
+    printf("\n");
 }
 
-void render_board(int board[BDROWS][BDCOLS]) {
+void initialize_screen(int term_rows, int term_cols,
+                       int *boardx, int *boardy,
+                       int *holdx, int *holdy,
+                       int *nextx, int *nexty) {
+    const int tall = 24, wide = 41;
+    int lpad = (term_cols - wide)/2;
+    int rpad = term_cols - wide - lpad;
+    int tbpad = (term_rows - tall)/2;
+
+    printf("\033[48;5;234m"); // grey background
+    for (int i = 0; i < tbpad; i++) {
+        for (int j = 0; j < term_cols; j++) printf(" ");
+        printf("\n");
+    }
+    pad_line("                                         ", lpad, rpad);
+    pad_line("   ┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┗━━━━━━━━┛   ", lpad, rpad);
+    pad_line("   ┃                    ┃      HOLD      ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┏━━━━━━━━┓   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
+    pad_line("   ┃                    ┃   ┗━━━━━━━━┛   ", lpad, rpad);
+    pad_line("   ┃                    ┃      NEXT      ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┃                    ┃                ", lpad, rpad);
+    pad_line("   ┗━━━━━━━━━━━━━━━━━━━━┛                ", lpad, rpad);
+    pad_line("                                         ", lpad, rpad);
+    for (int i = 0; i < tbpad; i++) {
+        for (int j = 0; j < term_cols; j++) printf(" ");
+        printf("\n");
+    }
+
+    // exporting coordinates
+    *boardx = tbpad + 3;
+    *boardy = lpad + 5;
+    *holdx = tbpad + 3;
+    *holdy = lpad + 30;
+    *nextx = tbpad + 11;
+    *nexty = lpad + 30;
+}
+
+void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
+    cursor_to(boardx, boardy);
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
@@ -89,19 +124,161 @@ void render_board(int board[BDROWS][BDCOLS]) {
     cursor_up(BDROWS);
 }
 
-void quit(struct termios *term_config, int board[BDROWS][BDCOLS]) {
-    render_board(board);
+void render_piece_in_4x8_grid(Piece p) {
+    /* printf("\033[48;5;234m        "); */
+    /* cursor_down(1); */
+    /* cursor_left(8); */
+    /* printf("        "); */
+    /* cursor_down(1); */
+    /* cursor_left(8); */
+    /* printf("        "); */
+    /* cursor_down(1); */
+    /* cursor_left(8); */
+    /* printf("        "); */
+
+    switch (p.type) {
+        case (I):
+            printf("\033[48;5;234m   ");
+            printf("\033[48;5;51m  "); // cyan
+            printf("\033[48;5;234m   ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   ");
+            printf("\033[48;5;51m  "); // cyan
+            printf("\033[48;5;234m   ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   ");
+            printf("\033[48;5;51m  "); // cyan
+            printf("\033[48;5;234m   ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   ");
+            printf("\033[48;5;51m  "); // cyan
+            printf("\033[48;5;234m   ");
+            break;
+        case (O):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m  ");
+            printf("\033[48;5;220m    "); // yellow
+            printf("\033[48;5;234m  ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m  ");
+            printf("\033[48;5;220m    "); // yellow
+            printf("\033[48;5;234m  ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+        case (T):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   ");
+            printf("\033[48;5;163m  "); // purple
+            printf("\033[48;5;234m   ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m ");
+            printf("\033[48;5;163m      "); // purple
+            printf("\033[48;5;234m ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+        case (L):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m     ");
+            printf("\033[48;5;202m  "); // orange
+            printf("\033[48;5;234m ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m "); 
+            printf("\033[48;5;202m      "); // orange
+            printf("\033[48;5;234m "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+        case (J):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m ");
+            printf("\033[48;5;21m  "); // blue
+            printf("\033[48;5;234m     ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m "); 
+            printf("\033[48;5;21m      "); // blue
+            printf("\033[48;5;234m "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+        case (S):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m "); 
+            printf("\033[48;5;40m    "); // green
+            printf("\033[48;5;234m   "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   "); 
+            printf("\033[48;5;40m    "); // green
+            printf("\033[48;5;234m "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+        case (Z):
+            printf("\033[48;5;234m        ");
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m   "); 
+            printf("\033[48;5;160m    "); // red
+            printf("\033[48;5;234m "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m "); 
+            printf("\033[48;5;160m    "); // red
+            printf("\033[48;5;234m   "); 
+            cursor_down(1);
+            cursor_left(8);
+            printf("\033[48;5;234m        ");
+            break;
+    }
+}
+
+void render_hold(Piece held, int holdx, int holdy) {
+    cursor_to(holdx, holdy);
+    render_piece_in_4x8_grid(held);
+}
+
+void render_next(Piece next, int nextx, int nexty) {
+    cursor_to(nextx, nexty);
+    render_piece_in_4x8_grid(next);
+}
+
+void quit(struct termios *term_config, int term_rows, int term_cols, int board[BDROWS][BDCOLS] /*, int boardx, int boardy*/) {
+    /* render_board(board, boardx, boardy); */
     set_stdin_flush(term_config);
-    cursor_down(22);
-    cursor_left(30);
+    cursor_down(term_rows);
+    cursor_left(term_cols);
     show_cursor();
     exit(0);
 }
 
-int process_keypress(char c, struct termios *term_config,
+int process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
                      int board[BDROWS][BDCOLS], Piece *p, Piece *held) {
     switch (c) {
-        case '!': quit(term_config, board); break;
+        case '!': quit(term_config, term_rows, term_cols, board); break;
         case 'a': turn_left(board, p);      break;
         case 's': hold(p, held);            break;
         case 'd': turn_right(board, p);     break;
@@ -118,70 +295,4 @@ int process_keypress(char c, struct termios *term_config,
         default: break;
     }
     return 1;
-}
-
-int main(void) {
-    struct termios term_config;
-    disable_canonical_stdin(&term_config);
-    hide_cursor();
-
-    int board[BDROWS][BDCOLS] = {0};
-    srand(time(NULL));
-    clock_t fall_control, fps_control;
-
-    initialize_screen();
-    cursor_up(22);
-    cursor_right(5);
-
-    Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, 0.4);
-
-    for (;;) {
-        fall_control = clock();
-        fps_control = clock();
-        if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
-            fps_control = clock();
-            render_board(board);
-        }
-
-        piece = next_piece;
-        next_piece = new_piece(rand() % 7 + 1, 0.4);
-        piece_held = {0};
-
-        stamp_piece(board, piece);
-
-        if (!down_is_valid(board, piece)) // filled screen
-            quit(&term_config, board);
-
-        // UPDATE PIECE
-        fall_control = clock();
-        while (down_is_valid(board, piece)) {
-piece_falling:
-            if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
-                fps_control = clock();
-                render_board(board);
-            }
-            if (((double)clock() - fall_control)/CLOCKS_PER_SEC >= piece.fall_time) {
-                fall_control = clock();
-                update_falling_piece(board, &piece);
-            }
-            if (kb_hit())
-                process_keypress(fgetc(stdin), &term_config, board, &piece, &piece_held);
-        }
-
-        // wiggle room after touching ground
-        fall_control = clock();
-        while (((double)clock() - fall_control)/CLOCKS_PER_SEC < piece.fall_time) {
-            if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
-                fps_control = clock();
-                render_board(board);
-            }
-            if (kb_hit())
-                process_keypress(fgetc(stdin), &term_config, board, &piece, &piece_held);
-
-            if (down_is_valid(board, piece)) // is now off of a ledge
-                goto piece_falling;
-        }
-    }
-
-    return 0;
 }
