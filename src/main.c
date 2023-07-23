@@ -14,12 +14,11 @@ int main() {
     
     initialize_screen(term_rows, term_cols, &boardx, &boardy,
                       &holdx, &holdy, &nextx, &nexty);
-    /* cursor_up(22); */
-    /* cursor_right(5); */
 
     Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, 0.4);
 
     for (;;) {
+        int hard_dropped = 0;
         fall_control = clock();
         fps_control = clock();
         /* if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) { */
@@ -35,7 +34,7 @@ int main() {
         stamp_piece(board, piece);
 
         if (!down_is_valid(board, piece)) // filled screen
-            quit(&term_config, term_rows, term_cols, board);
+            quit(&term_config, term_rows, term_cols);
 
         // UPDATE PIECE
         fall_control = clock();
@@ -51,19 +50,20 @@ piece_falling:
             }
             if (kb_hit())
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &piece_held);
+                                 board, &piece, &piece_held, &hard_dropped);
         }
 
         // wiggle room after touching ground
         fall_control = clock();
-        while (((double)clock() - fall_control)/CLOCKS_PER_SEC < piece.fall_time) {
+        while (!hard_dropped &&
+               ((double)clock() - fall_control)/CLOCKS_PER_SEC < 1.25*piece.fall_time) {
             if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
                 fps_control = clock();
                 render_board(board, boardx, boardy);
             }
             if (kb_hit())
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &piece_held);
+                                 board, &piece, &piece_held, &hard_dropped);
 
             if (down_is_valid(board, piece)) // is now off of a ledge
                 goto piece_falling;

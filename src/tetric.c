@@ -8,6 +8,7 @@
 #include "piece.h"
 
 #define FPS 30.0
+/* #define WIGGLE_TIME 1.0 */
 
 #ifndef BDROWS
 #define BDROWS 20
@@ -16,11 +17,19 @@
 #define BDCOLS 10
 #endif
 
+// colors:
+#define BG     "\033[48;5;234m" // grey
+#define CYAN   "\033[48;5;51m"
+#define YELLOW "\033[48;5;220m"
+#define PURPLE "\033[48;5;163m"
+#define ORANGE "\033[48;5;202m"
+#define BLUE   "\033[48;5;21m"
+#define GREEN  "\033[48;5;40m"
+#define RED    "\033[48;5;160m"
+
 typedef struct Coord {
     int x, y;
 } Coord;
-
-/* int boardx = 0, boardy = 0, holdx = 0, holdy = 0, nextx = 0, nexty = 0; */
 
 static void pad_line(const char *line, int left_pad, int right_pad) {
     for (int j = 0; j < left_pad; j++) printf(" ");
@@ -38,7 +47,7 @@ void initialize_screen(int term_rows, int term_cols,
     int rpad = term_cols - wide - lpad;
     int tbpad = (term_rows - tall)/2;
 
-    printf("\033[48;5;234m"); // grey background
+    printf("%s", BG);
     for (int i = 0; i < tbpad; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         printf("\n");
@@ -73,11 +82,11 @@ void initialize_screen(int term_rows, int term_cols,
     }
 
     // exporting coordinates
-    *boardx = tbpad + 3;
+    *boardx = tbpad + 2;
     *boardy = lpad + 5;
-    *holdx = tbpad + 3;
+    *holdx = tbpad + 2;
     *holdy = lpad + 30;
-    *nextx = tbpad + 11;
+    *nextx = tbpad + 10;
     *nexty = lpad + 30;
 }
 
@@ -86,37 +95,14 @@ void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
-                case (EMPTY):
-                    printf("\033[48;5;234m  ");
-                    break;
-                case (I):
-                    printf("\033[48;5;51m  ");  // cyan
-                    printf("\033[48;5;234m");
-                    break;
-                case (O):
-                    printf("\033[48;5;220m  "); // yellow
-                    printf("\033[48;5;234m");
-                    break;
-                case (T):
-                    printf("\033[48;5;163m  "); // purple
-                    printf("\033[48;5;234m");
-                    break;
-                case (L):
-                    printf("\033[48;5;202m  "); // orange
-                    printf("\033[48;5;234m");
-                    break;
-                case (J):
-                    printf("\033[48;5;21m  ");  // blue
-                    printf("\033[48;5;234m");
-                    break;
-                case (S):
-                    printf("\033[48;5;40m  ");  // green
-                    printf("\033[48;5;234m");
-                    break;
-                case (Z):
-                    printf("\033[48;5;160m  "); // red
-                    printf("\033[48;5;234m");
-                    break;
+                case EMPTY: printf("%s  ", BG);           break;
+                case I:     printf("%s  %s", CYAN,   BG); break;
+                case O:     printf("%s  %s", YELLOW, BG); break;
+                case T:     printf("%s  %s", PURPLE, BG); break;
+                case L:     printf("%s  %s", ORANGE, BG); break;
+                case J:     printf("%s  %s", BLUE,   BG); break;
+                case S:     printf("%s  %s", GREEN,  BG); break;
+                case Z:     printf("%s  %s", RED,    BG); break;
             }
         cursor_down(1);
         cursor_left(BDCOLS*2);
@@ -125,133 +111,90 @@ void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
 }
 
 void render_piece_in_4x8_grid(Piece p) {
-    /* printf("\033[48;5;234m        "); */
-    /* cursor_down(1); */
-    /* cursor_left(8); */
-    /* printf("        "); */
-    /* cursor_down(1); */
-    /* cursor_left(8); */
-    /* printf("        "); */
-    /* cursor_down(1); */
-    /* cursor_left(8); */
-    /* printf("        "); */
-
     switch (p.type) {
-        case (I):
-            printf("\033[48;5;234m   ");
-            printf("\033[48;5;51m  "); // cyan
-            printf("\033[48;5;234m   ");
+        case I:
+            printf("%s   %s  %s   ", BG, CYAN, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   ");
-            printf("\033[48;5;51m  "); // cyan
-            printf("\033[48;5;234m   ");
+            printf("%s   %s  %s   ", BG, CYAN, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   ");
-            printf("\033[48;5;51m  "); // cyan
-            printf("\033[48;5;234m   ");
+            printf("%s   %s  %s   ", BG, CYAN, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   ");
-            printf("\033[48;5;51m  "); // cyan
-            printf("\033[48;5;234m   ");
+            printf("%s   %s  %s   ", BG, CYAN, BG);
             break;
-        case (O):
-            printf("\033[48;5;234m        ");
+        case O:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m  ");
-            printf("\033[48;5;220m    "); // yellow
-            printf("\033[48;5;234m  ");
+            printf("%s  %s    %s  ", BG, YELLOW, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m  ");
-            printf("\033[48;5;220m    "); // yellow
-            printf("\033[48;5;234m  ");
+            printf("%s  %s    %s  ", BG, YELLOW, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
-        case (T):
-            printf("\033[48;5;234m        ");
+        case T:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   ");
-            printf("\033[48;5;163m  "); // purple
-            printf("\033[48;5;234m   ");
+            printf("%s   %s  %s   ", BG, PURPLE, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m ");
-            printf("\033[48;5;163m      "); // purple
-            printf("\033[48;5;234m ");
+            printf("%s %s      %s ", BG, PURPLE, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
-        case (L):
-            printf("\033[48;5;234m        ");
+        case L:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m     ");
-            printf("\033[48;5;202m  "); // orange
-            printf("\033[48;5;234m ");
+            printf("%s     %s  %s ", BG, ORANGE, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m "); 
-            printf("\033[48;5;202m      "); // orange
-            printf("\033[48;5;234m "); 
+            printf("%s %s      %s ", BG, ORANGE, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
-        case (J):
-            printf("\033[48;5;234m        ");
+        case J:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m ");
-            printf("\033[48;5;21m  "); // blue
-            printf("\033[48;5;234m     ");
+            printf("%s %s  %s     ", BG, BLUE, BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m "); 
-            printf("\033[48;5;21m      "); // blue
-            printf("\033[48;5;234m "); 
+            printf("%s %s      %s ", BG, BLUE, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
-        case (S):
-            printf("\033[48;5;234m        ");
+        case S:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m "); 
-            printf("\033[48;5;40m    "); // green
-            printf("\033[48;5;234m   "); 
+            printf("%s %s    %s   ", BG, GREEN, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   "); 
-            printf("\033[48;5;40m    "); // green
-            printf("\033[48;5;234m "); 
+            printf("%s   %s    %s ", BG, GREEN, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
-        case (Z):
-            printf("\033[48;5;234m        ");
+        case Z:
+            printf("%s        ", BG);
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m   "); 
-            printf("\033[48;5;160m    "); // red
-            printf("\033[48;5;234m "); 
+            printf("%s   %s    %s ", BG, RED, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m "); 
-            printf("\033[48;5;160m    "); // red
-            printf("\033[48;5;234m   "); 
+            printf("%s %s    %s   ", BG, RED, BG); 
             cursor_down(1);
             cursor_left(8);
-            printf("\033[48;5;234m        ");
+            printf("%s        ", BG);
             break;
     }
 }
@@ -266,8 +209,7 @@ void render_next(Piece next, int nextx, int nexty) {
     render_piece_in_4x8_grid(next);
 }
 
-void quit(struct termios *term_config, int term_rows, int term_cols, int board[BDROWS][BDCOLS] /*, int boardx, int boardy*/) {
-    /* render_board(board, boardx, boardy); */
+void quit(struct termios *term_config, int term_rows, int term_cols) {
     set_stdin_flush(term_config);
     cursor_down(term_rows);
     cursor_left(term_cols);
@@ -276,22 +218,22 @@ void quit(struct termios *term_config, int term_rows, int term_cols, int board[B
 }
 
 int process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
-                     int board[BDROWS][BDCOLS], Piece *p, Piece *held) {
+                     int board[BDROWS][BDCOLS], Piece *p, Piece *held, int *hard_dropped) {
     switch (c) {
-        case '!': quit(term_config, term_rows, term_cols, board); break;
-        case 'a': turn_left(board, p);      break;
-        case 's': hold(p, held);            break;
-        case 'd': turn_right(board, p);     break;
-        case 'f': turn_180(board, p);       break;
-        case ' ': hard_drop(board, p);      break;
+        case '!': quit(term_config, term_rows, term_cols); break;
+        case 'a': turn_left(board, p);                     break;
+        case 's': hold(p, held);                           break;
+        case 'd': turn_right(board, p);                    break;
+        case 'f': turn_180(board, p);                      break;
+        case ' ': hard_drop(board, p, hard_dropped);       break;
         case '\033':      // arrow key
-                  fgetc(stdin); // first character after \033 is [
-                  switch (fgetc(stdin)) {
-                      case 'D': move_left(board, p);  break;
-                      case 'C': move_right(board, p); break;
-                      case 'B': soft_drop(p);         break;
-                  }
-                  break;
+            fgetc(stdin); // first character after \033 is [
+            switch (fgetc(stdin)) {
+                case 'D': move_left(board, p);  break;
+                case 'C': move_right(board, p); break;
+                case 'B': soft_drop(board, p);  break;
+            }
+            break;
         default: break;
     }
     return 1;

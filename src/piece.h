@@ -56,8 +56,8 @@ void move_left(int board[BDROWS][BDCOLS], Piece *p);
 
 void move_right(int board[BDROWS][BDCOLS], Piece *p);
 
-void soft_drop(Piece *p);
+void soft_drop(int board[BDROWS][BDCOLS], Piece *p);
 
-void hard_drop(int board[BDROWS][BDCOLS], Piece *p);
+void hard_drop(int board[BDROWS][BDCOLS], Piece *p, int *hard_dropped);
 
 #endif // PIECE_H_

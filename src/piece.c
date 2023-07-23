@@ -215,10 +215,17 @@ void move_right(int board[BDROWS][BDCOLS], Piece *p) {
     stamp_piece(board, *p);
 }
 
-void soft_drop(Piece *p) {
-    /* fprintf(stderr, "soft_drop: não implementada\n"); */
+void soft_drop(int board[BDROWS][BDCOLS], Piece *p) {
+    clear_piece(board, *p);
+    while (down_is_valid(board, *p))
+        p->posv++;
+    stamp_piece(board, *p);
 }
 
-void hard_drop(int board[BDROWS][BDCOLS], Piece *p) {
-    /* fprintf(stderr, "hard_drop: não implementada\n"); */
+void hard_drop(int board[BDROWS][BDCOLS], Piece *p, int *hard_dropped) {
+    *hard_dropped = 1;
+    clear_piece(board, *p);
+    while (down_is_valid(board, *p))
+        p->posv++;
+    stamp_piece(board, *p);
 }
