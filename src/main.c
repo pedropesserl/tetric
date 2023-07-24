@@ -76,6 +76,8 @@ piece_falling:
             if (down_is_valid(board, piece)) // is now off of a ledge
                 goto piece_falling;
         }
+        int rows_count = 0; // will be useful for counting points
+        clear_filled_rows(board, &rows_count);
     }
 
     return 0;

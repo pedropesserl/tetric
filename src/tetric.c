@@ -238,3 +238,34 @@ void process_keypress(char c, struct termios *term_config, int term_rows, int te
         default: break;
     }
 }
+
+void shift_above_rows(int board[BDROWS][BDCOLS], int curr_row) {
+    for (int i = curr_row; i > 0; i--) {
+        for (int j = 0; j < BDCOLS; j++) {
+            board[i][j] = board[i-1][j];
+        }
+    }
+    for (int j = 0; j < BDCOLS; j++)
+        board[0][j] = EMPTY;
+}
+
+void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
+    int filled_rows_cnt = 0;
+    for (int i = 0; i < BDROWS; i++) {
+        int empty_cells = 0;
+        for (int j = 0; j < BDCOLS; j++) {
+            if (board[i][j] == EMPTY) {
+                empty_cells++;
+                break;
+            }
+        }
+        if (empty_cells == 0) { // filled_row
+            for (int j = 0; j < BDCOLS; j++)
+                board[i][j] = EMPTY;
+            shift_above_rows(board, i);
+            filled_rows_cnt++;
+        }
+    }
+
+    *rows_count = filled_rows_cnt;
+}
