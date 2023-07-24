@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "matrix.h"
 #include "piece.h"
 
@@ -193,8 +194,23 @@ void turn_180(int board[BDROWS][BDCOLS], Piece *p) {
     stamp_piece(board, *p);
 }
 
-void hold(Piece *p, Piece *held) {
-    /* fprintf(stderr, "hold: não implementada\n"); */
+void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *was_held) {
+    if (*was_held)
+        return;
+    *was_held = 1;
+    clear_piece(board, *p);
+    if (held->type == 0) { // first hold
+        *held = *next;
+        *next = new_piece(rand() % 7 + 1, 0.8);
+    }
+    Piece temp = *p;
+    *p = *held;
+    p->posv = p->type == I || p->type == O ? -1: 0;
+    p->posh = 3;
+    *held = temp;
+    held->posv = held->type == I || p->type == O ? -1: 0;
+    held->posh = 3;
+    stamp_piece(board, *p);
 }
 
 void move_left(int board[BDROWS][BDCOLS], Piece *p) {

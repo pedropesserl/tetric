@@ -82,11 +82,11 @@ void initialize_screen(int term_rows, int term_cols,
     }
 
     // exporting coordinates
-    *boardx = tbpad + 2;
+    *boardx = tbpad + 3;
     *boardy = lpad + 5;
-    *holdx = tbpad + 2;
+    *holdx = tbpad + 3;
     *holdy = lpad + 30;
-    *nextx = tbpad + 10;
+    *nextx = tbpad + 11;
     *nexty = lpad + 30;
 }
 
@@ -217,15 +217,16 @@ void quit(struct termios *term_config, int term_rows, int term_cols) {
     exit(0);
 }
 
-int process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
-                     int board[BDROWS][BDCOLS], Piece *p, Piece *held, int *hard_dropped) {
+void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
+                     int board[BDROWS][BDCOLS], Piece *p, Piece *p_next, Piece *p_held,
+                     int *was_held, int *hard_dropped) {
     switch (c) {
-        case '!': quit(term_config, term_rows, term_cols); break;
-        case 'a': turn_left(board, p);                     break;
-        case 's': hold(p, held);                           break;
-        case 'd': turn_right(board, p);                    break;
-        case 'f': turn_180(board, p);                      break;
-        case ' ': hard_drop(board, p, hard_dropped);       break;
+        case '!': quit(term_config, term_rows, term_cols);  break;
+        case 'a': turn_left(board, p);                      break;
+        case 's': hold(board, p, p_next, p_held, was_held); break;
+        case 'd': turn_right(board, p);                     break;
+        case 'f': turn_180(board, p);                       break;
+        case ' ': hard_drop(board, p, hard_dropped);        break;
         case '\033':      // arrow key
             fgetc(stdin); // first character after \033 is [
             switch (fgetc(stdin)) {
@@ -236,5 +237,4 @@ int process_keypress(char c, struct termios *term_config, int term_rows, int ter
             break;
         default: break;
     }
-    return 1;
 }

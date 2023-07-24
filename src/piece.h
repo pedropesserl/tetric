@@ -50,7 +50,7 @@ void turn_right(int board[BDROWS][BDCOLS], Piece *p);
 
 void turn_180(int board[BDROWS][BDCOLS], Piece *p);
 
-void hold(Piece *p, Piece *held);
+void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *was_held);
 
 void move_left(int board[BDROWS][BDCOLS], Piece *p);
 

@@ -15,21 +15,17 @@ int main() {
     initialize_screen(term_rows, term_cols, &boardx, &boardy,
                       &holdx, &holdy, &nextx, &nexty);
 
-    Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, 0.4);
+    Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, 0.8);
 
     for (;;) {
-        int hard_dropped = 0;
+        int hard_dropped = 0, was_held = 0;
+
         fall_control = clock();
         fps_control = clock();
-        /* if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) { */
-        /*     fps_control = clock(); */
-        /*     render_board(board, boardx, boardy); */
-        /* } */ // acho que isso aqui nao ta fazendo nada
 
         piece = next_piece;
-        next_piece = new_piece(rand() % 7 + 1, 0.4);
+        next_piece = new_piece(rand() % 7 + 1, 0.8);
         render_next(next_piece, nextx, nexty);
-        /* piece_held = {0}; */
 
         stamp_piece(board, piece);
 
@@ -48,9 +44,15 @@ piece_falling:
                 fall_control = clock();
                 update_falling_piece(board, &piece);
             }
-            if (kb_hit())
+            if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &piece_held, &hard_dropped);
+                                 board, &piece, &next_piece, &piece_held,
+                                 &was_held, &hard_dropped);
+                if (was_held) {
+                    render_hold(piece_held, holdx, holdy);
+                    render_next(next_piece, nextx, nexty);
+                }
+            }
         }
 
         // wiggle room after touching ground
@@ -61,9 +63,15 @@ piece_falling:
                 fps_control = clock();
                 render_board(board, boardx, boardy);
             }
-            if (kb_hit())
+            if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &piece_held, &hard_dropped);
+                                 board, &piece, &next_piece, &piece_held,
+                                 &was_held, &hard_dropped);
+                if (was_held) {
+                    render_hold(piece_held, holdx, holdy);
+                    render_next(next_piece, nextx, nexty);
+                }
+            }
 
             if (down_is_valid(board, piece)) // is now off of a ledge
                 goto piece_falling;
