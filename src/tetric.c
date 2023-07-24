@@ -48,10 +48,11 @@ void initialize_screen(int term_rows, int term_cols,
     int tbpad = (term_rows - tall)/2;
 
     printf("%s", BG);
-    for (int i = 0; i < tbpad; i++) {
+    for (int i = 0; i < tbpad - 1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         printf("\n");
     }
+    for (int j = 0; j < term_cols; j++) printf(" ");
     pad_line("                                         ", lpad, rpad);
     pad_line("   ┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓   ", lpad, rpad);
     pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
@@ -76,10 +77,11 @@ void initialize_screen(int term_rows, int term_cols,
     pad_line("   ┃                    ┃                ", lpad, rpad);
     pad_line("   ┗━━━━━━━━━━━━━━━━━━━━┛                ", lpad, rpad);
     pad_line("                                         ", lpad, rpad);
-    for (int i = 0; i < tbpad; i++) {
+    for (int i = 0; i < tbpad - 1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         printf("\n");
     }
+    for (int j = 0; j < term_cols; j++) printf(" ");
 
     // exporting coordinates
     *boardx = tbpad + 3;

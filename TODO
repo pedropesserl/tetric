@@ -1,10 +1,10 @@
 - piece shadow on bottom of board
 
 for later:
-- points system
+- score system
 - levels system
 - increase falling speed according to current level
-- configs menu
+- configs menu (change controls)
 - improve rotation system
   - wall kick
   - maybe full blown SRS? (way in the future)
