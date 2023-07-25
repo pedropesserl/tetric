@@ -36,14 +36,14 @@ static void pad_line(const char *line, int left_pad, int right_pad) {
     printf("%s", line);
     for (int j = 0; j < right_pad; j++) printf(" ");
     cursor_down(1);
-    cursor_left(left_pad + 41 + right_pad);
+    cursor_left(left_pad + 35 + right_pad);
 }
 
 void initialize_screen(int term_rows, int term_cols,
                        int *boardx, int *boardy,
                        int *holdx, int *holdy,
                        int *nextx, int *nexty) {
-    const int tall = 24, wide = 41;
+    const int tall = 22, wide = 35;
     int lpad = (term_cols - wide)/2;
     int rpad = term_cols - wide - lpad;
     int tbpad = (term_rows - tall)/2;
@@ -59,30 +59,28 @@ void initialize_screen(int term_rows, int term_cols,
     for (int j = 0; j < term_cols; j++) printf(" ");
     cursor_down(1);
     cursor_left(term_cols);
-    pad_line("                                         ", lpad, rpad);
-    pad_line("   ┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┗━━━━━━━━┛   ", lpad, rpad);
-    pad_line("   ┃                    ┃      HOLD      ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┏━━━━━━━━┓   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
-    pad_line("   ┃                    ┃   ┗━━━━━━━━┛   ", lpad, rpad);
-    pad_line("   ┃                    ┃      NEXT      ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┃                    ┃                ", lpad, rpad);
-    pad_line("   ┗━━━━━━━━━━━━━━━━━━━━┛                ", lpad, rpad);
-    pad_line("                                         ", lpad, rpad);
+    pad_line("┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad);
+    pad_line("┃                    ┃      HOLD   ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃   ┏━━━━━━━━┓", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
+    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad);
+    pad_line("┃                    ┃      NEXT   ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┗━━━━━━━━━━━━━━━━━━━━┛             ", lpad, rpad);
     for (int i = 0; i < tbpad - 1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         cursor_down(1);
@@ -91,12 +89,12 @@ void initialize_screen(int term_rows, int term_cols,
     for (int j = 0; j < term_cols; j++) printf(" ");
 
     // exporting coordinates
-    *boardx = tbpad + 3;
-    *boardy = lpad + 5;
-    *holdx = tbpad + 3;
-    *holdy = lpad + 30;
-    *nextx = tbpad + 11;
-    *nexty = lpad + 30;
+    *boardx = tbpad + 2;
+    *boardy = lpad + 2;
+    *holdx = tbpad + 2;
+    *holdy = lpad + 27;
+    *nextx = tbpad + 10;
+    *nexty = lpad + 27;
 }
 
 void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {

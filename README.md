@@ -7,7 +7,7 @@ ncurses.
 
 Note: requires UTF-8 compatible terminal emulator; works best if the characters
 are exactly twice as tall as they are wide. Also, play on a terminal at least
-24 rows tall and 41 columns wide.
+22 rows tall and 35 columns wide.
 
 No keypress storage, hence no real fancy rotation system. Gameplay is similar
 to NES Tetris'. Soft drop is instantaneous too, the only difference to hard
