@@ -35,7 +35,8 @@ static void pad_line(const char *line, int left_pad, int right_pad) {
     for (int j = 0; j < left_pad; j++) printf(" ");
     printf("%s", line);
     for (int j = 0; j < right_pad; j++) printf(" ");
-    printf("\n");
+    cursor_down(1);
+    cursor_left(left_pad + 41 + right_pad);
 }
 
 void initialize_screen(int term_rows, int term_cols,
@@ -47,12 +48,17 @@ void initialize_screen(int term_rows, int term_cols,
     int rpad = term_cols - wide - lpad;
     int tbpad = (term_rows - tall)/2;
 
+    cursor_to(1, 1);
+
     printf("%s", BG);
     for (int i = 0; i < tbpad - 1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
-        printf("\n");
+        cursor_down(1);
+        cursor_left(term_cols);
     }
     for (int j = 0; j < term_cols; j++) printf(" ");
+    cursor_down(1);
+    cursor_left(term_cols);
     pad_line("                                         ", lpad, rpad);
     pad_line("   ┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓   ", lpad, rpad);
     pad_line("   ┃                    ┃   ┃        ┃   ", lpad, rpad);
@@ -79,7 +85,8 @@ void initialize_screen(int term_rows, int term_cols,
     pad_line("                                         ", lpad, rpad);
     for (int i = 0; i < tbpad - 1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
-        printf("\n");
+        cursor_down(1);
+        cursor_left(term_cols);
     }
     for (int j = 0; j < term_cols; j++) printf(" ");
 
@@ -97,14 +104,14 @@ void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
-                case EMPTY: printf("%s  ", BG);           break;
-                case I:     printf("%s  %s", CYAN,   BG); break;
-                case O:     printf("%s  %s", YELLOW, BG); break;
-                case T:     printf("%s  %s", PURPLE, BG); break;
-                case L:     printf("%s  %s", ORANGE, BG); break;
-                case J:     printf("%s  %s", BLUE,   BG); break;
-                case S:     printf("%s  %s", GREEN,  BG); break;
-                case Z:     printf("%s  %s", RED,    BG); break;
+                case EMPTY: printf("%s  ", BG);       break;
+                case I: printf("%s  %s", CYAN,   BG); break;
+                case O: printf("%s  %s", YELLOW, BG); break;
+                case T: printf("%s  %s", PURPLE, BG); break;
+                case L: printf("%s  %s", ORANGE, BG); break;
+                case J: printf("%s  %s", BLUE,   BG); break;
+                case S: printf("%s  %s", GREEN,  BG); break;
+                case Z: printf("%s  %s", RED,    BG); break;
             }
         cursor_down(1);
         cursor_left(BDCOLS*2);

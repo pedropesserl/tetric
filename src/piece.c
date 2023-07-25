@@ -12,13 +12,11 @@ void clear_piece(int board[BDROWS][BDCOLS], Piece p) {
 void stamp_piece(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            if (p.matrix[i][j] != EMPTY)
+            if (p.matrix[i][j] != EMPTY && i + p.posv >= 0)
                 board[i + p.posv][j + p.posh] = p.matrix[i][j];
 }
 
 int boundaries_are_valid(Piece p) {
-    if (p.posv + highest_row(p.matrix) < 0)
-        return 0;    // top of board
     if (p.posv + lowest_row(p.matrix) > 19)
         return 0;    // end of board
     if (p.posh + leftmost_column(p.matrix) < 0)
