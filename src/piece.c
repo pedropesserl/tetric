@@ -2,7 +2,7 @@
 #include "matrix.h"
 #include "piece.h"
 
-void clear_piece(int board[BDROWS][BDCOLS], Piece p) {
+void erase_piece(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             if (p.matrix[i][j] != EMPTY)
@@ -155,7 +155,7 @@ Piece new_piece(int type, float fall_time) {
 }
 
 void update_falling_piece(int board[BDROWS][BDCOLS], Piece *p) {
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     p->posv++;
     stamp_piece(board, *p);
 }
@@ -164,7 +164,7 @@ void turn_left(int board[BDROWS][BDCOLS], Piece *p) {
     if (p->type == O)
         return;
 
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     if (turn_left_is_valid(board, *p))
         rotate_left(p->matrix, p->type == I ? 4 : 3);
     stamp_piece(board, *p);
@@ -174,7 +174,7 @@ void turn_right(int board[BDROWS][BDCOLS], Piece *p) {
     if (p->type == O)
         return;
 
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     if (turn_right_is_valid(board, *p))
         rotate_right(p->matrix, p->type == I ? 4 : 3);
     stamp_piece(board, *p);
@@ -184,7 +184,7 @@ void turn_180(int board[BDROWS][BDCOLS], Piece *p) {
     if (p->type == O)
         return;
 
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     if (turn_180_is_valid(board, *p)) {
         reflect_horizontal(p->matrix, p->type == I ? 4 : 3);
         reflect_vertical(p->matrix, p->type == I ? 4 : 3);
@@ -196,7 +196,7 @@ void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *wa
     if (*was_held)
         return;
     *was_held = 1;
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     if (held->type == 0) { // first hold
         *held = *next;
         *next = new_piece(rand() % 7 + 1, 0.8);
@@ -215,7 +215,7 @@ void move_left(int board[BDROWS][BDCOLS], Piece *p) {
     if (!left_is_valid(board, *p))
         return;
     
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     p->posh--;
     stamp_piece(board, *p);
 }
@@ -224,13 +224,13 @@ void move_right(int board[BDROWS][BDCOLS], Piece *p) {
     if (!right_is_valid(board, *p))
         return;
     
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     p->posh++;
     stamp_piece(board, *p);
 }
 
 void soft_drop(int board[BDROWS][BDCOLS], Piece *p) {
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     while (down_is_valid(board, *p))
         p->posv++;
     stamp_piece(board, *p);
@@ -238,7 +238,7 @@ void soft_drop(int board[BDROWS][BDCOLS], Piece *p) {
 
 void hard_drop(int board[BDROWS][BDCOLS], Piece *p, int *hard_dropped) {
     *hard_dropped = 1;
-    clear_piece(board, *p);
+    erase_piece(board, *p);
     while (down_is_valid(board, *p))
         p->posv++;
     stamp_piece(board, *p);

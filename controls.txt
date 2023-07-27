@@ -5,4 +5,5 @@ s turn 180
 → move right
 ↓ soft drop
 ␣ hard drop
+1 reset
 ! quit

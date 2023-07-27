@@ -49,7 +49,8 @@ piece_falling:
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &next_piece, &piece_held,
+                                 board, &boardx, &boardy, &holdx, &holdy, &nextx, &nexty,
+                                 &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, holdx, holdy);
@@ -68,7 +69,8 @@ piece_falling:
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &piece, &next_piece, &piece_held,
+                                 board, &boardx, &boardy, &holdx, &holdy, &nextx, &nexty,
+                                 &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, holdx, holdy);

@@ -22,7 +22,7 @@ typedef struct Piece {
     int posv, posh; // position of matrix's upper-left corner relative to board
 } Piece;
 
-void clear_piece(int board[BDROWS][BDCOLS], Piece p);
+void erase_piece(int board[BDROWS][BDCOLS], Piece p);
 
 void stamp_piece(int board[BDROWS][BDCOLS], Piece p);
 
