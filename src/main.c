@@ -27,10 +27,13 @@ int main() {
         next_piece = new_piece(rand() % 7 + 1, 0.8);
         render_next(next_piece, nextx, nexty);
 
-        stamp_piece(board, piece);
-
-        if (!down_is_valid(board, piece)) // filled screen
+        if (piece_board_collision(board, piece)) { // filled screen
+            stamp_piece(board, piece);
+            render_board(board, boardx, boardy);
             quit(&term_config, term_rows, term_cols);
+        }
+
+        stamp_piece(board, piece);
 
         // UPDATE PIECE
         fall_control = clock();
