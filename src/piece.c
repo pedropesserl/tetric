@@ -6,22 +6,22 @@ void erase_piece(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             if (p.matrix[i][j] != EMPTY)
-                board[i + p.posv][j + p.posh] = EMPTY;
+                board[i + p.pos.x][j + p.pos.y] = EMPTY;
 }
 
 void stamp_piece(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            if (p.matrix[i][j] != EMPTY && i + p.posv >= 0)
-                board[i + p.posv][j + p.posh] = p.matrix[i][j];
+            if (p.matrix[i][j] != EMPTY && i + p.pos.x >= 0)
+                board[i + p.pos.x][j + p.pos.y] = p.matrix[i][j];
 }
 
 int boundaries_are_valid(Piece p) {
-    if (p.posv + lowest_row(p.matrix) > 19)
+    if (p.pos.x + lowest_row(p.matrix) > 19)
         return 0;    // end of board
-    if (p.posh + leftmost_column(p.matrix) < 0)
+    if (p.pos.y + leftmost_column(p.matrix) < 0)
         return 0;    // left wall
-    if (p.posh + rightmost_column(p.matrix) > 9)
+    if (p.pos.y + rightmost_column(p.matrix) > 9)
         return 0;    // right wall
     return 1;
 }
@@ -29,18 +29,18 @@ int boundaries_are_valid(Piece p) {
 int piece_board_collision(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            if (p.matrix[i][j] != EMPTY && board[i + p.posv][j + p.posh] != EMPTY)
+            if (p.matrix[i][j] != EMPTY && board[i + p.pos.x][j + p.pos.y] != EMPTY)
                 return 1;
     return 0;
 }
 
 int down_is_valid(int board[BDROWS][BDCOLS], Piece p) {
-    if (p.posv + lowest_row(p.matrix) >= 19)
+    if (p.pos.x + lowest_row(p.matrix) >= 19)
         return 0; // end of board
     for (int j = 0; j < 4; j++)
         for (int i = 3; i >= 0; i--)
             if (p.matrix[i][j] != EMPTY) {
-                if (board[i+1 + p.posv][j + p.posh] != EMPTY)
+                if (board[i+1 + p.pos.x][j + p.pos.y] != EMPTY)
                     return 0; // blocks underneath
                 else
                     break;
@@ -49,12 +49,12 @@ int down_is_valid(int board[BDROWS][BDCOLS], Piece p) {
 }
 
 int left_is_valid(int board[BDROWS][BDCOLS], Piece p) {
-    if (p.posh + leftmost_column(p.matrix) <= 0)
+    if (p.pos.y + leftmost_column(p.matrix) <= 0)
         return 0; // left wall
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             if (p.matrix[i][j] != EMPTY) {
-                if (board[i + p.posv][j-1 + p.posh] != EMPTY)
+                if (board[i + p.pos.x][j-1 + p.pos.y] != EMPTY)
                     return 0; // blocks to the left
                 else
                     break;
@@ -63,12 +63,12 @@ int left_is_valid(int board[BDROWS][BDCOLS], Piece p) {
 }
 
 int right_is_valid(int board[BDROWS][BDCOLS], Piece p) {
-    if (p.posh + rightmost_column(p.matrix) >= 9)
+    if (p.pos.y + rightmost_column(p.matrix) >= 9)
         return 0; // right wall
     for (int i = 0; i < 4; i++)
         for (int j = 3; j >= 0; j--)
             if (p.matrix[i][j] != EMPTY) {
-                if (board[i + p.posv][j+1 + p.posh] != EMPTY)
+                if (board[i + p.pos.x][j+1 + p.pos.y] != EMPTY)
                     return 0; // blocks to the left
                 else
                     break;
@@ -96,8 +96,8 @@ Piece new_piece(int type, float fall_time) {
     Piece p = {0};
     p.type = type;
     p.fall_time = fall_time;
-    p.posv = 0;
-    p.posh = 3;
+    p.pos.x = 0;
+    p.pos.y = 3;
     switch (type) {
         case I: 
             // 0 0 0 0
@@ -105,7 +105,7 @@ Piece new_piece(int type, float fall_time) {
             // 0 0 0 0
             // 0 0 0 0
             p.matrix[1][0] = p.matrix[1][1] = p.matrix[1][2] = p.matrix[1][3] = I;
-            p.posv = -1;
+            p.pos.x = -1;
             break;
         case O: 
             // 0 0 0 0
@@ -113,7 +113,7 @@ Piece new_piece(int type, float fall_time) {
             // 0 O O 0
             // 0 0 0 0
             p.matrix[1][1] = p.matrix[1][2] = p.matrix[2][1] = p.matrix[2][2] = O;
-            p.posv = -1;
+            p.pos.x = -1;
             break;
         case T: 
             // 0 T 0 0
@@ -156,7 +156,7 @@ Piece new_piece(int type, float fall_time) {
 
 void update_falling_piece(int board[BDROWS][BDCOLS], Piece *p) {
     erase_piece(board, *p);
-    p->posv++;
+    p->pos.x++;
     stamp_piece(board, *p);
 }
 
@@ -203,11 +203,11 @@ void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *wa
     }
     Piece temp = *p;
     *p = *held;
-    p->posv = p->type == I || p->type == O ? -1: 0;
-    p->posh = 3;
+    p->pos.x = p->type == I || p->type == O ? -1: 0;
+    p->pos.y = 3;
     *held = temp;
-    held->posv = held->type == I || p->type == O ? -1: 0;
-    held->posh = 3;
+    held->pos.x = held->type == I || p->type == O ? -1: 0;
+    held->pos.y = 3;
     stamp_piece(board, *p);
 }
 
@@ -216,7 +216,7 @@ void move_left(int board[BDROWS][BDCOLS], Piece *p) {
         return;
     
     erase_piece(board, *p);
-    p->posh--;
+    p->pos.y--;
     stamp_piece(board, *p);
 }
 
@@ -225,14 +225,14 @@ void move_right(int board[BDROWS][BDCOLS], Piece *p) {
         return;
     
     erase_piece(board, *p);
-    p->posh++;
+    p->pos.y++;
     stamp_piece(board, *p);
 }
 
 void soft_drop(int board[BDROWS][BDCOLS], Piece *p) {
     erase_piece(board, *p);
     while (down_is_valid(board, *p))
-        p->posv++;
+        p->pos.x++;
     stamp_piece(board, *p);
 }
 
@@ -240,6 +240,6 @@ void hard_drop(int board[BDROWS][BDCOLS], Piece *p, int *hard_dropped) {
     *hard_dropped = 1;
     erase_piece(board, *p);
     while (down_is_valid(board, *p))
-        p->posv++;
+        p->pos.x++;
     stamp_piece(board, *p);
 }

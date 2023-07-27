@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g -Wextra
+CFLAGS = -Wall -Wextra
 OBJ = src/main.o src/libtermio.o src/matrix.o src/piece.o
 DEPS = src/libtermio.h src/matrix.h src/piece.h
 

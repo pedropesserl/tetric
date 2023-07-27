@@ -26,10 +26,13 @@
 #define BLUE   "\033[48;5;21m"
 #define GREEN  "\033[48;5;40m"
 #define RED    "\033[48;5;160m"
-
-typedef struct Coord {
-    int x, y;
-} Coord;
+#define CYAN_SH   "\033[48;5;m"
+#define YELLOW_SH "\033[48;5;m"
+#define PURPLE_SH "\033[48;5;m"
+#define ORANGE_SH "\033[48;5;m"
+#define BLUE_SH   "\033[48;5;m"
+#define GREEN_SH  "\033[48;5;m"
+#define RED_SH    "\033[48;5;m"
 
 static void pad_line(const char *line, int left_pad, int right_pad) {
     for (int j = 0; j < left_pad; j++) printf(" ");
@@ -40,9 +43,7 @@ static void pad_line(const char *line, int left_pad, int right_pad) {
 }
 
 void initialize_screen(int term_rows, int term_cols,
-                       int *boardx, int *boardy,
-                       int *holdx, int *holdy,
-                       int *nextx, int *nexty) {
+                       Coord *board, Coord *hold, Coord *next) {
     const int tall = 22, wide = 35;
     int lpad = (term_cols - wide)/2;
     int rpad = term_cols - wide - lpad;
@@ -89,16 +90,16 @@ void initialize_screen(int term_rows, int term_cols,
     for (int j = 0; j < term_cols; j++) printf(" ");
 
     // exporting coordinates
-    *boardx = tbpad + 2;
-    *boardy = lpad + 2;
-    *holdx = tbpad + 2;
-    *holdy = lpad + 27;
-    *nextx = tbpad + 10;
-    *nexty = lpad + 27;
+    board->x = tbpad + 2;
+    board->y = lpad + 2;
+    hold->x = tbpad + 2;
+    hold->y = lpad + 27;
+    next->x = tbpad + 10;
+    next->y = lpad + 27;
 }
 
-void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
-    cursor_to(boardx, boardy);
+void render_board(int board[BDROWS][BDCOLS], Coord board_xy) {
+    cursor_to(board_xy.x, board_xy.y);
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
@@ -115,6 +116,7 @@ void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
         cursor_left(BDCOLS*2);
     }
     cursor_up(BDROWS);
+    printf("%s", BG);
 }
 
 void render_piece_in_4x8_grid(Piece p) {
@@ -206,20 +208,14 @@ void render_piece_in_4x8_grid(Piece p) {
     }
 }
 
-void render_hold(Piece held, int holdx, int holdy) {
-    cursor_to(holdx, holdy);
+void render_hold(Piece held, Coord hold_xy) {
+    cursor_to(hold_xy.x, hold_xy.y);
     render_piece_in_4x8_grid(held);
 }
 
-void render_next(Piece next, int nextx, int nexty) {
-    cursor_to(nextx, nexty);
+void render_next(Piece next, Coord next_xy) {
+    cursor_to(next_xy.x, next_xy.y);
     render_piece_in_4x8_grid(next);
-}
-
-void clear_board(int board[BDROWS][BDCOLS]) {
-    for (int i = 0; i < BDROWS; i++)
-        for (int j = 0; j < BDCOLS; j++)
-            board[i][j] = EMPTY;
 }
 
 void quit(struct termios *term_config, int term_rows, int term_cols) {
@@ -230,35 +226,33 @@ void quit(struct termios *term_config, int term_rows, int term_cols) {
     exit(0);
 }
 
-void reset(int term_rows, int term_cols,
-           int board[BDROWS][BDCOLS], int *boardx, int *boardy,
-           int *holdx, int *holdy, int *nextx, int *nexty,
-           Piece *p, Piece *p_next, Piece *p_held,
-           int *was_held, int *hard_dropped) {
-    clear_board(board);
-    initialize_screen(term_rows, term_cols, boardx, boardy, holdx, holdy, nextx, nexty);
+void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS],
+           Coord *board_xy, Coord *hold_xy, Coord *next_xy,
+           Piece *p, Piece *p_next, Piece *p_held, int *was_held, int *hard_dropped) {
+    memset(board, EMPTY, 10 * 20 * sizeof(int));
+    memset(p, EMPTY, sizeof(Piece));
+    memset(p_held, EMPTY, sizeof(Piece));
+    *p_next = new_piece(rand() % 7 + 1, 0.8);
+    initialize_screen(term_rows, term_cols, board_xy, hold_xy, next_xy);
     *hard_dropped = 0;
     *was_held = 0;
-    memset(p, 0, sizeof(Piece));
-    memset(p_held, 0, sizeof(Piece));
-    *p_next = new_piece(rand() % 7 + 1, 0.8);
 }
 
 void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
-                      int board[BDROWS][BDCOLS], int *boardx, int *boardy,
-                      int *holdx, int *holdy, int *nextx, int *nexty,
+                      int board[BDROWS][BDCOLS], Coord *board_xy,
+                      Coord *hold_xy, Coord *next_xy,
                       Piece *p, Piece *p_next, Piece *p_held,
                       int *was_held, int *hard_dropped) {
     switch (c) {
-        case '!': quit(term_config, term_rows, term_cols);          break;
-        case '1': reset(term_rows, term_cols, board, boardx,
-                        boardy, holdx, holdy, nextx, nexty,
-                        p, p_next, p_held, was_held, hard_dropped); break;
-        case 'a': turn_left(board, p);                              break;
-        case 's': hold(board, p, p_next, p_held, was_held);         break;
-        case 'd': turn_right(board, p);                             break;
-        case 'f': turn_180(board, p);                               break;
-        case ' ': hard_drop(board, p, hard_dropped);                break;
+        case '!': quit(term_config, term_rows, term_cols);  break;
+        case '1': reset(term_rows, term_cols, board, board_xy,
+                        hold_xy, next_xy, p, p_next, p_held,
+                        was_held, hard_dropped);            break;
+        case 'a': turn_left(board, p);                      break;
+        case 's': hold(board, p, p_next, p_held, was_held); break;
+        case 'd': turn_right(board, p);                     break;
+        case 'f': turn_180(board, p);                       break;
+        case ' ': hard_drop(board, p, hard_dropped);        break;
         case '\033':      // arrow key
             fgetc(stdin); // first character after \033 is [
             switch (fgetc(stdin)) {

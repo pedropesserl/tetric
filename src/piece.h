@@ -15,11 +15,15 @@
 #define S 6
 #define Z 7
 
+typedef struct Coord {
+    int x, y;
+} Coord;
+
 typedef struct Piece {
     int type;
     int matrix[MAX][MAX];
     float fall_time;
-    int posv, posh; // position of matrix's upper-left corner relative to board
+    Coord pos; // position of matrix's upper-left corner relative to board
 } Piece;
 
 void erase_piece(int board[BDROWS][BDCOLS], Piece p);
