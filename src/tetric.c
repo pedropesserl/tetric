@@ -102,14 +102,14 @@ void render_board(int board[BDROWS][BDCOLS], int boardx, int boardy) {
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
-                case EMPTY: printf("%s  ", BG);       break;
-                case I: printf("%s  %s", CYAN,   BG); break;
-                case O: printf("%s  %s", YELLOW, BG); break;
-                case T: printf("%s  %s", PURPLE, BG); break;
-                case L: printf("%s  %s", ORANGE, BG); break;
-                case J: printf("%s  %s", BLUE,   BG); break;
-                case S: printf("%s  %s", GREEN,  BG); break;
-                case Z: printf("%s  %s", RED,    BG); break;
+                case EMPTY: printf("%s  ", BG); break;
+                case I: printf("%s  ", CYAN  ); break;
+                case O: printf("%s  ", YELLOW); break;
+                case T: printf("%s  ", PURPLE); break;
+                case L: printf("%s  ", ORANGE); break;
+                case J: printf("%s  ", BLUE  ); break;
+                case S: printf("%s  ", GREEN ); break;
+                case Z: printf("%s  ", RED   ); break;
             }
         cursor_down(1);
         cursor_left(BDCOLS*2);
