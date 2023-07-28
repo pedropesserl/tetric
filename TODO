@@ -1,3 +1,6 @@
+REPLACE MILLION COORD VARIABLES FOR A SINGLE STRUCT
+write update_game_state function (src/tetric.c)
+
 for later:
 - score system
 - levels system

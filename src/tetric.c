@@ -27,16 +27,21 @@
 #define RED    "\033[48;5;160m"
 #define LTGREY "\033[48;5;238m" // lighter grey
 
-static void pad_line(const char *line, int left_pad, int right_pad) {
-    for (int j = 0; j < left_pad; j++) printf(" ");
+/* typedef struct RenderItemsXY { */
+/*     Coord board, hold, next, points, level; */
+/* } RenderItemsXY; */
+
+static void pad_line(const char *line, int lpad, int rpad) {
+    for (int j = 0; j < lpad; j++) printf(" ");
     printf("%s", line);
-    for (int j = 0; j < right_pad; j++) printf(" ");
+    for (int j = 0; j < rpad; j++) printf(" ");
     cursor_down(1);
-    cursor_left(left_pad + 35 + right_pad);
+    cursor_left(lpad + 35 + rpad);
 }
 
 void initialize_screen(int term_rows, int term_cols,
-                       Coord *board, Coord *hold, Coord *next) {
+                       Coord *board, Coord *hold, Coord *next,
+                       Coord *points, Coord *level) {
     const int tall = 22, wide = 35;
     int lpad = (term_cols - wide)/2;
     int rpad = term_cols - wide - lpad;
@@ -45,7 +50,7 @@ void initialize_screen(int term_rows, int term_cols,
     cursor_to(1, 1);
 
     printf("%s", BG);
-    for (int i = 0; i < tbpad - 1; i++) {
+    for (int i = 0; i < tbpad-1; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         cursor_down(1);
         cursor_left(term_cols);
@@ -70,12 +75,12 @@ void initialize_screen(int term_rows, int term_cols,
     pad_line("┃                    ┃      NEXT   ", lpad, rpad);
     pad_line("┃                    ┃             ", lpad, rpad);
     pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃     POINTS  ", lpad, rpad);
+    pad_line("┃                    ┃            0", lpad, rpad);
     pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
+    pad_line("┃                    ┃    LEVEL   1", lpad, rpad);
     pad_line("┗━━━━━━━━━━━━━━━━━━━━┛             ", lpad, rpad);
-    for (int i = 0; i < tbpad - 1; i++) {
+    for (int i = 0; i < tbpad; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
         cursor_down(1);
         cursor_left(term_cols);
@@ -89,6 +94,10 @@ void initialize_screen(int term_rows, int term_cols,
     hold->y = lpad + 27;
     next->x = tbpad + 10;
     next->y = lpad + 27;
+    points->x = tbpad + 19;
+    points->y = lpad + 24;
+    level->x = tbpad + 21;
+    level->y = lpad + 33;
 }
 
 void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
@@ -213,14 +222,24 @@ void render_piece_in_4x8_grid(Piece p) {
     }
 }
 
-void render_hold(Piece held, Coord hold_xy) {
-    cursor_to(hold_xy.x, hold_xy.y);
-    render_piece_in_4x8_grid(held);
+void render_hold(Piece p_held, Coord hold) {
+    cursor_to(hold.x, hold.y);
+    render_piece_in_4x8_grid(p_held);
 }
 
-void render_next(Piece next, Coord next_xy) {
-    cursor_to(next_xy.x, next_xy.y);
-    render_piece_in_4x8_grid(next);
+void render_next(Piece p_next, Coord next) {
+    cursor_to(next.x, next.y);
+    render_piece_in_4x8_grid(p_next);
+}
+
+void render_points(int npoints, Coord points) {
+    cursor_to(points.x, points.y);
+    printf("%12d", npoints);
+}
+
+void render_level(int nlevel, Coord level) {
+    cursor_to(level.x, level.y);
+    printf("%3d", nlevel);
 }
 
 void quit(struct termios *term_config, int term_rows, int term_cols) {
@@ -232,26 +251,27 @@ void quit(struct termios *term_config, int term_rows, int term_cols) {
 }
 
 void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS],
-           Coord *board_xy, Coord *hold_xy, Coord *next_xy,
+           Coord *board_xy, Coord *hold_xy, Coord *next_xy, Coord *points_xy, Coord *level_xy,
            Piece *p, Piece *p_next, Piece *p_held, int *was_held, int *hard_dropped) {
     memset(board, EMPTY, 10 * 20 * sizeof(int));
     memset(p, EMPTY, sizeof(Piece));
     memset(p_held, EMPTY, sizeof(Piece));
     *p_next = new_piece(rand() % 7 + 1, 0.8);
-    initialize_screen(term_rows, term_cols, board_xy, hold_xy, next_xy);
+    initialize_screen(term_rows, term_cols, board_xy, hold_xy, next_xy,
+                      points_xy, level_xy);
     *hard_dropped = 0;
     *was_held = 0;
 }
 
 void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
                       int board[BDROWS][BDCOLS], Coord *board_xy,
-                      Coord *hold_xy, Coord *next_xy,
+                      Coord *hold_xy, Coord *next_xy, Coord *points_xy, Coord *level_xy,
                       Piece *p, Piece *p_next, Piece *p_held,
                       int *was_held, int *hard_dropped) {
     switch (c) {
         case '!': quit(term_config, term_rows, term_cols);  break;
         case '1': reset(term_rows, term_cols, board, board_xy,
-                        hold_xy, next_xy, p, p_next, p_held,
+                        hold_xy, next_xy, points_xy, level_xy, p, p_next, p_held,
                         was_held, hard_dropped);            break;
         case 'a': turn_left(board, p);                      break;
         case 's': hold(board, p, p_next, p_held, was_held); break;
@@ -299,4 +319,11 @@ void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
     }
 
     *rows_count = filled_rows_cnt;
+}
+
+void update_game_state(int rows_cleared, int *level, int *points, float *fall_time) {
+    (void)rows_cleared;
+    (void)level;
+    (void)points;
+    (void)fall_time;
 }

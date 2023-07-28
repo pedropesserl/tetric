@@ -10,11 +10,14 @@ int main() {
     int board[BDROWS][BDCOLS] = {0};
     srand(time(NULL));
     clock_t fall_control, fps_control;
-    Coord board_xy, hold_xy, next_xy;
+    
+    /* RenderItemsXY items_xy; */ 
+    Coord board_xy, hold_xy, next_xy, points_xy, level_xy;
     int level = 1;
+    int points = 0;
     float fall_time = 0.8;
     
-    initialize_screen(term_rows, term_cols, &board_xy, &hold_xy, &next_xy);
+    initialize_screen(term_rows, term_cols, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy);
 
     Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, fall_time);
 
@@ -50,7 +53,7 @@ piece_falling:
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &board_xy, &hold_xy, &next_xy,
+                                 board, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy,
                                  &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
@@ -70,7 +73,7 @@ piece_falling:
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &board_xy, &hold_xy, &next_xy,
+                                 board, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy,
                                  &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
@@ -82,9 +85,13 @@ piece_falling:
             if (down_is_valid(board, piece)) // is now off of a ledge
                 goto piece_falling;
         }
-        int rows_cleared = 0; // will be useful for counting points
+        int rows_cleared = 0;
         clear_filled_rows(board, &rows_cleared);
-        /* update_level(&level, rows_cleared, &fall_time); */
+        if (rows_cleared > 0) {
+            update_game_state(rows_cleared, &level, &points, &fall_time);
+            render_points(points, points_xy);
+            render_level(level, level_xy);
+        }
     }
 
     return 0;
