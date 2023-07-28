@@ -21,6 +21,7 @@ drop is that it doesn't lock the piece in place automatically.
 - → move right
 - ↓ soft drop
 - ␣ hard drop
+- 1 reset
 - ! quit
 
 ### Sources:

@@ -30,7 +30,7 @@ int main() {
 
         if (piece_board_collision(board, piece)) { // filled screen
             stamp_piece(board, piece);
-            render_board(board, board_xy);
+            render_board(board, board_xy, piece);
             quit(&term_config, term_rows, term_cols);
         }
 
@@ -42,7 +42,7 @@ int main() {
 piece_falling:
             if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
                 fps_control = clock();
-                render_board(board, board_xy);
+                render_board(board, board_xy, piece);
             }
             if (((double)clock() - fall_control)/CLOCKS_PER_SEC >= piece.fall_time) {
                 fall_control = clock();
@@ -66,7 +66,7 @@ piece_falling:
                ((double)clock() - fall_control)/CLOCKS_PER_SEC < 1.25*piece.fall_time) {
             if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
                 fps_control = clock();
-                render_board(board, board_xy);
+                render_board(board, board_xy, piece);
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,

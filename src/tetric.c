@@ -8,7 +8,6 @@
 #include "piece.h"
 
 #define FPS 30.0
-/* #define WIGGLE_TIME 1.0 */
 
 #ifndef BDROWS
 #define BDROWS 20
@@ -26,13 +25,7 @@
 #define BLUE   "\033[48;5;21m"
 #define GREEN  "\033[48;5;40m"
 #define RED    "\033[48;5;160m"
-#define CYAN_SH   "\033[48;5;m"
-#define YELLOW_SH "\033[48;5;m"
-#define PURPLE_SH "\033[48;5;m"
-#define ORANGE_SH "\033[48;5;m"
-#define BLUE_SH   "\033[48;5;m"
-#define GREEN_SH  "\033[48;5;m"
-#define RED_SH    "\033[48;5;m"
+#define LTGREY "\033[48;5;238m" // lighter grey
 
 static void pad_line(const char *line, int left_pad, int right_pad) {
     for (int j = 0; j < left_pad; j++) printf(" ");
@@ -98,12 +91,15 @@ void initialize_screen(int term_rows, int term_cols,
     next->y = lpad + 27;
 }
 
-void render_board(int board[BDROWS][BDCOLS], Coord board_xy) {
+void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
+    Piece s = p;
+    while (down_is_valid(board, s))
+        s.pos.x++;
+
     cursor_to(board_xy.x, board_xy.y);
     for (int i = 0; i < BDROWS; i++) {
         for (int j = 0; j < BDCOLS; j++)
             switch (board[i][j]) {
-                case EMPTY: printf("%s  ", BG); break;
                 case I: printf("%s  ", CYAN  ); break;
                 case O: printf("%s  ", YELLOW); break;
                 case T: printf("%s  ", PURPLE); break;
@@ -111,6 +107,15 @@ void render_board(int board[BDROWS][BDCOLS], Coord board_xy) {
                 case J: printf("%s  ", BLUE  ); break;
                 case S: printf("%s  ", GREEN ); break;
                 case Z: printf("%s  ", RED   ); break;
+                case EMPTY:
+                    if (down_is_valid(board, p) &&
+                          s.pos.x <= i && i <= s.pos.x + 3 &&
+                          s.pos.y <= j && j <= s.pos.y + 3 &&
+                          s.matrix[i - s.pos.x][j - s.pos.y] != EMPTY)
+                        printf("%s  ", LTGREY);
+                    else
+                        printf("%s  ", BG);
+                    break;
             }
         cursor_down(1);
         cursor_left(BDCOLS*2);
@@ -285,7 +290,7 @@ void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
                 break;
             }
         }
-        if (empty_cells == 0) { // filled_row
+        if (empty_cells == 0) { // filled row
             for (int j = 0; j < BDCOLS; j++)
                 board[i][j] = EMPTY;
             shift_above_rows(board, i);

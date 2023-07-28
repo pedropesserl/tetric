@@ -5,7 +5,7 @@
 void erase_piece(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            if (p.matrix[i][j] != EMPTY)
+            if (p.matrix[i][j] != EMPTY && i + p.pos.x >= 0)
                 board[i + p.pos.x][j + p.pos.y] = EMPTY;
 }
 
@@ -53,7 +53,7 @@ int left_is_valid(int board[BDROWS][BDCOLS], Piece p) {
         return 0; // left wall
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            if (p.matrix[i][j] != EMPTY) {
+            if (p.matrix[i][j] != EMPTY && i + p.pos.x >= 0) {
                 if (board[i + p.pos.x][j-1 + p.pos.y] != EMPTY)
                     return 0; // blocks to the left
                 else
@@ -67,9 +67,11 @@ int right_is_valid(int board[BDROWS][BDCOLS], Piece p) {
         return 0; // right wall
     for (int i = 0; i < 4; i++)
         for (int j = 3; j >= 0; j--)
-            if (p.matrix[i][j] != EMPTY) {
-                if (board[i + p.pos.x][j+1 + p.pos.y] != EMPTY)
-                    return 0; // blocks to the left
+            if (p.matrix[i][j] != EMPTY && i + p.pos.x >= 0) {
+                if (board[i + p.pos.x][j+1 + p.pos.y] != EMPTY) {
+                    exit(1);
+                    return 0; // blocks to the right
+                }
                 else
                     break;
             }
