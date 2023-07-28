@@ -68,10 +68,8 @@ int right_is_valid(int board[BDROWS][BDCOLS], Piece p) {
     for (int i = 0; i < 4; i++)
         for (int j = 3; j >= 0; j--)
             if (p.matrix[i][j] != EMPTY && i + p.pos.x >= 0) {
-                if (board[i + p.pos.x][j+1 + p.pos.y] != EMPTY) {
-                    exit(1);
+                if (board[i + p.pos.x][j+1 + p.pos.y] != EMPTY)
                     return 0; // blocks to the right
-                }
                 else
                     break;
             }
