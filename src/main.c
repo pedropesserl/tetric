@@ -11,13 +11,12 @@ int main() {
     srand(time(NULL));
     clock_t fall_control, fps_control;
     
-    /* RenderItemsXY items_xy; */ 
-    Coord board_xy, hold_xy, next_xy, points_xy, level_xy;
+    ItemsXY items_xy;
     int level = 1;
     int points = 0;
     float fall_time = 0.8;
     
-    initialize_screen(term_rows, term_cols, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy);
+    initialize_screen(term_rows, term_cols, &items_xy);
 
     Piece piece = {0}, piece_held = {0}, next_piece = new_piece(rand() % 7 + 1, fall_time);
 
@@ -29,11 +28,11 @@ int main() {
 
         piece = next_piece;
         next_piece = new_piece(rand() % 7 + 1, fall_time);
-        render_next(next_piece, next_xy);
+        render_next(next_piece, items_xy.next);
 
         if (piece_board_collision(board, piece)) { // filled screen
             stamp_piece(board, piece);
-            render_board(board, board_xy, piece);
+            render_board(board, items_xy.board, piece);
             quit(&term_config, term_rows, term_cols);
         }
 
@@ -45,7 +44,7 @@ int main() {
 piece_falling:
             if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
                 fps_control = clock();
-                render_board(board, board_xy, piece);
+                render_board(board, items_xy.board, piece);
             }
             if (((double)clock() - fall_control)/CLOCKS_PER_SEC >= piece.fall_time) {
                 fall_control = clock();
@@ -53,12 +52,11 @@ piece_falling:
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy,
-                                 &piece, &next_piece, &piece_held,
+                                 board, &items_xy, &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
-                    render_hold(piece_held, hold_xy);
-                    render_next(next_piece, next_xy);
+                    render_hold(piece_held, items_xy.hold);
+                    render_next(next_piece, items_xy.next);
                 }
             }
         }
@@ -69,16 +67,15 @@ piece_falling:
                ((double)clock() - fall_control)/CLOCKS_PER_SEC < 1.25*piece.fall_time) {
             if (((double)clock() - fps_control)/CLOCKS_PER_SEC >= 1.0/FPS) {
                 fps_control = clock();
-                render_board(board, board_xy, piece);
+                render_board(board, items_xy.board, piece);
             }
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
-                                 board, &board_xy, &hold_xy, &next_xy, &points_xy, &level_xy,
-                                 &piece, &next_piece, &piece_held,
+                                 board, &items_xy, &piece, &next_piece, &piece_held,
                                  &was_held, &hard_dropped);
                 if (was_held) {
-                    render_hold(piece_held, hold_xy);
-                    render_next(next_piece, next_xy);
+                    render_hold(piece_held, items_xy.hold);
+                    render_next(next_piece, items_xy.next);
                 }
             }
 
@@ -89,8 +86,8 @@ piece_falling:
         clear_filled_rows(board, &rows_cleared);
         if (rows_cleared > 0) {
             update_game_state(rows_cleared, &level, &points, &fall_time);
-            render_points(points, points_xy);
-            render_level(level, level_xy);
+            render_points(points, items_xy.points);
+            render_level(level, items_xy.level);
         }
     }
 

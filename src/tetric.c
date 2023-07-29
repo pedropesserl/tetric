@@ -27,9 +27,9 @@
 #define RED    "\033[48;5;160m"
 #define LTGREY "\033[48;5;238m" // lighter grey
 
-/* typedef struct RenderItemsXY { */
-/*     Coord board, hold, next, points, level; */
-/* } RenderItemsXY; */
+typedef struct ItemsXY {
+    Coord board, hold, next, points, level;
+} ItemsXY;
 
 static void pad_line(const char *line, int lpad, int rpad) {
     for (int j = 0; j < lpad; j++) printf(" ");
@@ -39,9 +39,7 @@ static void pad_line(const char *line, int lpad, int rpad) {
     cursor_left(lpad + 35 + rpad);
 }
 
-void initialize_screen(int term_rows, int term_cols,
-                       Coord *board, Coord *hold, Coord *next,
-                       Coord *points, Coord *level) {
+void initialize_screen(int term_rows, int term_cols, ItemsXY *items) {
     const int tall = 22, wide = 35;
     int lpad = (term_cols - wide)/2;
     int rpad = term_cols - wide - lpad;
@@ -88,16 +86,16 @@ void initialize_screen(int term_rows, int term_cols,
     for (int j = 0; j < term_cols; j++) printf(" ");
 
     // exporting coordinates
-    board->x = tbpad + 2;
-    board->y = lpad + 2;
-    hold->x = tbpad + 2;
-    hold->y = lpad + 27;
-    next->x = tbpad + 10;
-    next->y = lpad + 27;
-    points->x = tbpad + 19;
-    points->y = lpad + 24;
-    level->x = tbpad + 21;
-    level->y = lpad + 33;
+    items->board.x = tbpad + 2;
+    items->board.y = lpad + 2;
+    items->hold.x = tbpad + 2;
+    items->hold.y = lpad + 27;
+    items->next.x = tbpad + 10;
+    items->next.y = lpad + 27;
+    items->points.x = tbpad + 19;
+    items->points.y = lpad + 24;
+    items->level.x = tbpad + 21;
+    items->level.y = lpad + 33;
 }
 
 void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
@@ -250,28 +248,25 @@ void quit(struct termios *term_config, int term_rows, int term_cols) {
     exit(0);
 }
 
-void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS],
-           Coord *board_xy, Coord *hold_xy, Coord *next_xy, Coord *points_xy, Coord *level_xy,
+void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS], ItemsXY *items_xy,
            Piece *p, Piece *p_next, Piece *p_held, int *was_held, int *hard_dropped) {
     memset(board, EMPTY, 10 * 20 * sizeof(int));
     memset(p, EMPTY, sizeof(Piece));
     memset(p_held, EMPTY, sizeof(Piece));
     *p_next = new_piece(rand() % 7 + 1, 0.8);
-    initialize_screen(term_rows, term_cols, board_xy, hold_xy, next_xy,
-                      points_xy, level_xy);
+    initialize_screen(term_rows, term_cols, items_xy);
     *hard_dropped = 0;
     *was_held = 0;
 }
 
 void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
-                      int board[BDROWS][BDCOLS], Coord *board_xy,
-                      Coord *hold_xy, Coord *next_xy, Coord *points_xy, Coord *level_xy,
+                      int board[BDROWS][BDCOLS], ItemsXY *items_xy,
                       Piece *p, Piece *p_next, Piece *p_held,
                       int *was_held, int *hard_dropped) {
     switch (c) {
         case '!': quit(term_config, term_rows, term_cols);  break;
-        case '1': reset(term_rows, term_cols, board, board_xy,
-                        hold_xy, next_xy, points_xy, level_xy, p, p_next, p_held,
+        case '1': reset(term_rows, term_cols, board, items_xy,
+                        p, p_next, p_held,
                         was_held, hard_dropped);            break;
         case 'a': turn_left(board, p);                      break;
         case 's': hold(board, p, p_next, p_held, was_held); break;
