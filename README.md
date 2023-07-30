@@ -5,6 +5,13 @@ ncurses.
 
 <img src="example.gif" width="350">
 
+### Quick Start
+
+```bash
+$ git clone https://github.com/pedropesserl/tetric.git
+$ make
+```
+
 Note: requires UTF-8 compatible terminal emulator; works best if the characters
 are exactly twice as tall as they are wide. Also, play on a terminal at least
 22 rows tall and 35 columns wide.
