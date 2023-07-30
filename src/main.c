@@ -25,7 +25,6 @@ int main() {
     
     initialize_screen(term_rows, term_cols, &gs);
 
-
     for (;;) {
         gs.hard_dropped = 0;
         gs.was_held = 0;

@@ -1,4 +1,6 @@
-- configs menu (change controls)
+- configs menu
+    - change controls
+    - choose true random or 7-bag
 - improve rotation system
-  - wall kick
-  - maybe full blown SRS? (way in the future)
+    - wall kick
+- look into whether rendering everything to a buffer and then rendering the buffer for every frame could enhance performance
