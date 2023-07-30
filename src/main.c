@@ -54,7 +54,8 @@ piece_falling:
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
                                  board, &items_xy, &piece, &next_piece, &piece_held,
-                                 fall_time, &was_held, &hard_dropped);
+                                 fall_time, &total_rows, &points, &level,
+                                 &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, items_xy.hold);
                     render_next(next_piece, items_xy.next);
@@ -73,7 +74,8 @@ piece_falling:
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
                                  board, &items_xy, &piece, &next_piece, &piece_held,
-                                 fall_time, &was_held, &hard_dropped);
+                                 fall_time, &total_rows, &points, &level,
+                                 &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, items_xy.hold);
                     render_next(next_piece, items_xy.next);

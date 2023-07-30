@@ -76,7 +76,7 @@ void initialize_screen(int term_rows, int term_cols, ItemsXY *items) {
     pad_line("┃                    ┃     POINTS  ", lpad, rpad);
     pad_line("┃                    ┃            0", lpad, rpad);
     pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃    LEVEL   1", lpad, rpad);
+    pad_line("┃                    ┃    LEVEL   0", lpad, rpad);
     pad_line("┗━━━━━━━━━━━━━━━━━━━━┛             ", lpad, rpad);
     for (int i = 0; i < tbpad; i++) {
         for (int j = 0; j < term_cols; j++) printf(" ");
@@ -249,31 +249,36 @@ void quit(struct termios *term_config, int term_rows, int term_cols) {
 }
 
 void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS], ItemsXY *items_xy,
-           Piece *p, Piece *p_next, Piece *p_held, int *was_held, int *hard_dropped) {
+           Piece *p, Piece *p_next, Piece *p_held, int *points, int *level,
+           int *total_rows, int *was_held, int *hard_dropped) {
     memset(board, EMPTY, 10 * 20 * sizeof(int));
     memset(p, EMPTY, sizeof(Piece));
     memset(p_held, EMPTY, sizeof(Piece));
     *p_next = new_piece(rand() % 7 + 1, 0.8);
     initialize_screen(term_rows, term_cols, items_xy);
+    *points = 0;
+    *level = 0;
+    *total_rows = 0;
     *hard_dropped = 0;
     *was_held = 0;
 }
 
 void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
                       int board[BDROWS][BDCOLS], ItemsXY *items_xy,
-                      Piece *p, Piece *p_next, Piece *p_held,
-                      float fall_time, int *was_held, int *hard_dropped) {
+                      Piece *p, Piece *p_next, Piece *p_held, float fall_time,
+                      int *points, int *level, int *total_rows,
+                      int *was_held, int *hard_dropped) {
     switch (c) {
-        case '!': quit(term_config, term_rows, term_cols);  break;
-        case '1': reset(term_rows, term_cols, board,
-                        items_xy, p, p_next, p_held,
-                        was_held, hard_dropped);            break;
-        case 'a': turn_left(board, p);                      break;
+        case '!': quit(term_config, term_rows, term_cols);   break;
+        case '1': reset(term_rows, term_cols, board, items_xy,
+                        p, p_next, p_held, points, level,
+                        total_rows, was_held, hard_dropped); break;
+        case 'a': turn_left(board, p);                       break;
         case 's': hold(board, p, p_next, p_held,
-                       fall_time, was_held);                break;
-        case 'd': turn_right(board, p);                     break;
-        case 'f': turn_180(board, p);                       break;
-        case ' ': hard_drop(board, p, hard_dropped);        break;
+                       fall_time, was_held);                 break;
+        case 'd': turn_right(board, p);                      break;
+        case 'f': turn_180(board, p);                        break;
+        case ' ': hard_drop(board, p, hard_dropped);         break;
         case '\033':      // arrow key
             fgetc(stdin); // first character after \033 is [
             switch (fgetc(stdin)) {
