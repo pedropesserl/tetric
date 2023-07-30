@@ -1,6 +1,7 @@
 a turn left
 d turn right
 s turn 180
+f hold
 ← move left
 → move right
 ↓ soft drop

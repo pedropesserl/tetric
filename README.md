@@ -24,6 +24,7 @@ drop is that it doesn't lock the piece in place automatically.
 - a turn left
 - d turn right
 - s turn 180
+- f hold
 - ← move left
 - → move right
 - ↓ soft drop
