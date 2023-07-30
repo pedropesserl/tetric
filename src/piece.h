@@ -15,14 +15,13 @@
 #define S 6
 #define Z 7
 
-typedef struct Coord {
+typedef struct Coord_s {
     int x, y;
 } Coord;
 
-typedef struct Piece {
+typedef struct Piece_s {
     int type;
     int matrix[MAX][MAX];
-    float fall_time;
     Coord pos; // position of matrix's upper-left corner relative to board
 } Piece;
 
@@ -44,7 +43,7 @@ int turn_left_is_valid(int board[BDROWS][BDCOLS], Piece p);
 
 int turn_right_is_valid(int board[BDROWS][BDCOLS], Piece p);
 
-Piece new_piece(int type, float fall_time);
+Piece new_piece(int type);
 
 void update_falling_piece(int board[BDROWS][BDCOLS], Piece *p);
 
@@ -54,8 +53,7 @@ void turn_right(int board[BDROWS][BDCOLS], Piece *p);
 
 void turn_180(int board[BDROWS][BDCOLS], Piece *p);
 
-void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held,
-          float fall_time, int *was_held);
+void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *was_held);
 
 void move_left(int board[BDROWS][BDCOLS], Piece *p);
 

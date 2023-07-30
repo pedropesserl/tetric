@@ -92,10 +92,9 @@ int turn_180_is_valid(int board[BDROWS][BDCOLS], Piece p) {
     return boundaries_are_valid(p) && !piece_board_collision(board, p);
 }
 
-Piece new_piece(int type, float fall_time) {
+Piece new_piece(int type) {
     Piece p = {0};
     p.type = type;
-    p.fall_time = fall_time;
     p.pos.x = 0;
     p.pos.y = 3;
     switch (type) {
@@ -192,15 +191,14 @@ void turn_180(int board[BDROWS][BDCOLS], Piece *p) {
     stamp_piece(board, *p);
 }
 
-void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held,
-          float fall_time, int *was_held) {
+void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *was_held) {
     if (*was_held)
         return;
     *was_held = 1;
     erase_piece(board, *p);
     if (held->type == 0) { // first hold
         *held = *next;
-        *next = new_piece(rand() % 7 + 1, fall_time);
+        *next = new_piece(rand() % 7 + 1);
     }
     Piece temp = *p;
     *p = *held;
