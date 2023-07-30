@@ -262,14 +262,15 @@ void reset(int term_rows, int term_cols, int board[BDROWS][BDCOLS], ItemsXY *ite
 void process_keypress(char c, struct termios *term_config, int term_rows, int term_cols,
                       int board[BDROWS][BDCOLS], ItemsXY *items_xy,
                       Piece *p, Piece *p_next, Piece *p_held,
-                      int *was_held, int *hard_dropped) {
+                      float fall_time, int *was_held, int *hard_dropped) {
     switch (c) {
         case '!': quit(term_config, term_rows, term_cols);  break;
-        case '1': reset(term_rows, term_cols, board, items_xy,
-                        p, p_next, p_held,
+        case '1': reset(term_rows, term_cols, board,
+                        items_xy, p, p_next, p_held,
                         was_held, hard_dropped);            break;
         case 'a': turn_left(board, p);                      break;
-        case 's': hold(board, p, p_next, p_held, was_held); break;
+        case 's': hold(board, p, p_next, p_held,
+                       fall_time, was_held);                break;
         case 'd': turn_right(board, p);                     break;
         case 'f': turn_180(board, p);                       break;
         case ' ': hard_drop(board, p, hard_dropped);        break;
@@ -286,11 +287,10 @@ void process_keypress(char c, struct termios *term_config, int term_rows, int te
 }
 
 void shift_above_rows(int board[BDROWS][BDCOLS], int curr_row) {
-    for (int i = curr_row; i > 0; i--) {
-        for (int j = 0; j < BDCOLS; j++) {
+    for (int i = curr_row; i > 0; i--)
+        for (int j = 0; j < BDCOLS; j++)
             board[i][j] = board[i-1][j];
-        }
-    }
+
     for (int j = 0; j < BDCOLS; j++)
         board[0][j] = EMPTY;
 }
@@ -316,9 +316,22 @@ void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
     *rows_count = filled_rows_cnt;
 }
 
-void update_game_state(int rows_cleared, int *level, int *points, float *fall_time) {
-    (void)rows_cleared;
-    (void)level;
-    (void)points;
-    (void)fall_time;
+void update_fall_time(float *fall_time, int lv) {
+    if ((1 <= lv && lv <= 10) || lv == 13 || lv == 16 || lv == 19 || lv == 29 || lv == 39)
+        *fall_time *= 0.85;
+}
+
+void update_game_state(int rows_cleared, int total_rows, int *level,
+                       int *points, float *fall_time) {
+    // score follows NEStris system
+    switch (rows_cleared) {
+        case 1:  *points +=   40 * (*level + 1); break; // single
+        case 2:  *points +=  100 * (*level + 1); break; // double
+        case 3:  *points +=  300 * (*level + 1); break; // triple
+        default: *points += 1200 * (*level + 1); break; // tetris
+    }
+    if ((total_rows + rows_cleared)/10 > total_rows/10) {
+        (*level)++;
+        update_fall_time(fall_time, *level);
+    }
 }

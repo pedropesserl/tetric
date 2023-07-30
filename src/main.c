@@ -12,8 +12,9 @@ int main() {
     clock_t fall_control, fps_control;
     
     ItemsXY items_xy;
-    int level = 1;
+    int level = 0;
     int points = 0;
+    int total_rows = 0;
     float fall_time = 0.8;
     
     initialize_screen(term_rows, term_cols, &items_xy);
@@ -53,7 +54,7 @@ piece_falling:
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
                                  board, &items_xy, &piece, &next_piece, &piece_held,
-                                 &was_held, &hard_dropped);
+                                 fall_time, &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, items_xy.hold);
                     render_next(next_piece, items_xy.next);
@@ -72,7 +73,7 @@ piece_falling:
             if (kb_hit()) {
                 process_keypress(fgetc(stdin), &term_config, term_rows, term_cols,
                                  board, &items_xy, &piece, &next_piece, &piece_held,
-                                 &was_held, &hard_dropped);
+                                 fall_time, &was_held, &hard_dropped);
                 if (was_held) {
                     render_hold(piece_held, items_xy.hold);
                     render_next(next_piece, items_xy.next);
@@ -85,10 +86,11 @@ piece_falling:
         int rows_cleared = 0;
         clear_filled_rows(board, &rows_cleared);
         if (rows_cleared > 0) {
-            update_game_state(rows_cleared, &level, &points, &fall_time);
+            update_game_state(rows_cleared, total_rows, &level, &points, &fall_time);
             render_points(points, items_xy.points);
             render_level(level, items_xy.level);
         }
+        total_rows += rows_cleared;
     }
 
     return 0;

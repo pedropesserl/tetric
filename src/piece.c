@@ -192,14 +192,15 @@ void turn_180(int board[BDROWS][BDCOLS], Piece *p) {
     stamp_piece(board, *p);
 }
 
-void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held, int *was_held) {
+void hold(int board[BDROWS][BDCOLS], Piece *p, Piece *next, Piece *held,
+          float fall_time, int *was_held) {
     if (*was_held)
         return;
     *was_held = 1;
     erase_piece(board, *p);
     if (held->type == 0) { // first hold
         *held = *next;
-        *next = new_piece(rand() % 7 + 1, 0.8);
+        *next = new_piece(rand() % 7 + 1, fall_time);
     }
     Piece temp = *p;
     *p = *held;
