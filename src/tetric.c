@@ -261,6 +261,7 @@ void reset(int term_rows, int term_cols, GameState *gs) {
     memset(&(gs->board), EMPTY, 10 * 20 * sizeof(int));
     memset(&(gs->piece), EMPTY, sizeof(Piece));
     memset(&(gs->p_held), EMPTY, sizeof(Piece));
+    gs->piece = new_piece(rand() % 7 + 1);
     gs->p_next = new_piece(rand() % 7 + 1);
     initialize_screen(term_rows, term_cols, gs);
     gs->points = 0;
@@ -269,6 +270,11 @@ void reset(int term_rows, int term_cols, GameState *gs) {
     gs->total_rows = 0;
     gs->hard_dropped = 0;
     gs->was_held = 0;
+    stamp_piece(gs->board, gs->piece);
+    render_board(gs->board, gs->board_xy, gs->piece);
+    render_next(gs->p_next, gs->next_xy);
+    render_points(gs->points, gs->points_xy);
+    render_level(gs->level, gs->level_xy);
 }
 
 void process_keypress(char c, struct termios *term_config,
