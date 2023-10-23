@@ -1,14 +1,21 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
-OBJ = src/main.o src/libtermio.o src/matrix.o src/piece.o
-DEPS = src/libtermio.h src/matrix.h src/piece.h
+PROGRAM = tetric
+CFLAGS = -Iinclude -Wall -Wextra
+
+_OBJ = main.o libtermio.o matrix.o piece.o
+_DEPS = libtermio.h matrix.h piece.h
+
+SDIR = src
+IDIR = include
+OBJ = $(_OBJ:%=$(SDIR)/%)
+DEPS = $(_DEPS:%=$(IDIR)/%)
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: tetric clean
+all: $(PROGRAM) clean
 
-tetric: $(OBJ)
+$(PROGRAM): $(OBJ)
 	$(CC) -o $@ $^
 
 clean:
