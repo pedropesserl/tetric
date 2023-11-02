@@ -110,7 +110,7 @@ void initialize_screen(int term_rows, int term_cols, GameState *gs) {
 void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
     Piece s = p;
     while (down_is_valid(board, s))
-        s.pos.x++;
+        s.pos.x++; // calcular sombra da peça
 
     cursor_to(board_xy.x, board_xy.y);
     for (int i = 0; i < BDROWS; i++) {
