@@ -16,6 +16,9 @@
 #define BDCOLS 10
 #endif
 
+#define BDHEIGHT 22
+#define BDWIDTH  35
+
 // colors:
 #define BG     "\033[48;5;234m" // grey
 #define CYAN   "\033[48;5;51m"
@@ -33,66 +36,84 @@ typedef struct ItemsXY_s {
 
 typedef struct GameState_s {
     int board[BDROWS][BDCOLS];
-    int points, level, total_rows;
+    int points;
+    int level;
+    int total_rows;
     float fall_time;
-    Piece piece, p_held, p_next;
-    Coord board_xy, hold_xy, next_xy, points_xy, level_xy;
-    int hard_dropped, was_held;
+    Piece piece;
+    Piece p_held;
+    Piece p_next;
+    Coord board_xy;
+    Coord hold_xy;
+    Coord next_xy;
+    Coord points_xy;
+    Coord level_xy;
+    int hard_dropped;
+    int was_held;
 } GameState;
 
-static void pad_line(const char *line, int lpad, int rpad) {
-    for (int j = 0; j < lpad; j++) printf(" ");
+static void pad_line(const char *line, int lpad, int rpad, char *pad, int pad_size) {
+    memset(pad, '\0', pad_size);
+    memset(pad, ' ', lpad);
+    printf("%s", pad);
     printf("%s", line);
-    for (int j = 0; j < rpad; j++) printf(" ");
+    memset(pad, ' ', rpad);
+    printf("%s", pad);
     cursor_down(1);
-    cursor_left(lpad + 35 + rpad);
+    cursor_left(lpad + BDWIDTH + rpad);
 }
 
 void initialize_screen(int term_rows, int term_cols, GameState *gs) {
-    const int tall = 22, wide = 35;
-    int lpad = (term_cols - wide)/2;
-    int rpad = term_cols - wide - lpad;
-    int tbpad = (term_rows - tall)/2;
+    int lpad = (term_cols - BDWIDTH)/2;
+    int rpad = term_cols - BDWIDTH - lpad;
+    int tbpad = (term_rows - BDHEIGHT)/2;
 
     cursor_to(1, 1);
 
+    char *blank_line = (char*)calloc(term_cols + 1, sizeof(char));
+    memset(blank_line, ' ', term_cols);
     printf("%s", BG);
     for (int i = 0; i < tbpad-1; i++) {
-        for (int j = 0; j < term_cols; j++) printf(" ");
+        printf("%s", blank_line);
         cursor_down(1);
         cursor_left(term_cols);
     }
-    for (int j = 0; j < term_cols; j++) printf(" ");
+    printf("%s", blank_line);
+
+    int pad_size = lpad > rpad ? lpad + 1 : rpad + 1;
+    char *pad = (char*)calloc(pad_size, sizeof(char));
     cursor_down(1);
     cursor_left(term_cols);
-    pad_line("┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad);
-    pad_line("┃                    ┃      HOLD   ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃   ┏━━━━━━━━┓", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┃        ┃", lpad, rpad);
-    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad);
-    pad_line("┃                    ┃      NEXT   ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃     POINTS  ", lpad, rpad);
-    pad_line("┃                    ┃            0", lpad, rpad);
-    pad_line("┃                    ┃             ", lpad, rpad);
-    pad_line("┃                    ┃    LEVEL   0", lpad, rpad);
-    pad_line("┗━━━━━━━━━━━━━━━━━━━━┛             ", lpad, rpad);
+    pad_line("┏━━━━━━━━━━━━━━━━━━━━┓   ┏━━━━━━━━┓", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃      HOLD   ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃             ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┏━━━━━━━━┓", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┃        ┃", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃   ┗━━━━━━━━┛", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃      NEXT   ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃             ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃             ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃     POINTS  ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃            0", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃             ", lpad, rpad, pad, pad_size);
+    pad_line("┃                    ┃    LEVEL   0", lpad, rpad, pad, pad_size);
+    pad_line("┗━━━━━━━━━━━━━━━━━━━━┛             ", lpad, rpad, pad, pad_size);
+    free(pad);
     for (int i = 0; i < tbpad; i++) {
-        for (int j = 0; j < term_cols; j++) printf(" ");
+        printf("%s", blank_line);
         cursor_down(1);
         cursor_left(term_cols);
     }
-    for (int j = 0; j < term_cols; j++) printf(" ");
+    printf("%s", blank_line);
+    free(blank_line);
 
     // exporting coordinates
     gs->board_xy.x = tbpad + 2;
@@ -109,12 +130,13 @@ void initialize_screen(int term_rows, int term_cols, GameState *gs) {
 
 void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
     Piece s = p;
-    while (down_is_valid(board, s))
-        s.pos.x++; // calcular sombra da peça
+    while (down_is_valid(board, s)) {
+        s.pos.x++; // calculate piece shadow
+    }
 
     cursor_to(board_xy.x, board_xy.y);
     for (int i = 0; i < BDROWS; i++) {
-        for (int j = 0; j < BDCOLS; j++)
+        for (int j = 0; j < BDCOLS; j++) {
             switch (board[i][j]) {
                 case I: printf("%s  ", CYAN  ); break;
                 case O: printf("%s  ", YELLOW); break;
@@ -127,12 +149,14 @@ void render_board(int board[BDROWS][BDCOLS], Coord board_xy, Piece p) {
                     if (down_is_valid(board, p) &&
                           s.pos.x <= i && i <= s.pos.x + 3 &&
                           s.pos.y <= j && j <= s.pos.y + 3 &&
-                          s.matrix[i - s.pos.x][j - s.pos.y] != EMPTY)
+                          s.matrix[i - s.pos.x][j - s.pos.y] != EMPTY) {
                         printf("%s  ", LTGREY);
-                    else
+                    } else {
                         printf("%s  ", BG);
+                    }
                     break;
             }
+        }
         cursor_down(1);
         cursor_left(BDCOLS*2);
     }
@@ -302,12 +326,15 @@ void process_keypress(char c, struct termios *term_config,
 }
 
 void shift_above_rows(int board[BDROWS][BDCOLS], int curr_row) {
-    for (int i = curr_row; i > 0; i--)
-        for (int j = 0; j < BDCOLS; j++)
+    for (int i = curr_row; i > 0; i--) {
+        for (int j = 0; j < BDCOLS; j++) {
             board[i][j] = board[i-1][j];
+        }
+    }
 
-    for (int j = 0; j < BDCOLS; j++)
+    for (int j = 0; j < BDCOLS; j++) {
         board[0][j] = EMPTY;
+    }
 }
 
 void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
@@ -321,8 +348,9 @@ void clear_filled_rows(int board[BDROWS][BDCOLS], int *rows_count) {
             }
         }
         if (empty_cells == 0) { // filled row
-            for (int j = 0; j < BDCOLS; j++)
+            for (int j = 0; j < BDCOLS; j++) {
                 board[i][j] = EMPTY;
+            }
             shift_above_rows(board, i);
             filled_rows_cnt++;
         }

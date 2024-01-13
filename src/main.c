@@ -81,8 +81,9 @@ piece_falling:
                 }
             }
 
-            if (down_is_valid(gs.board, gs.piece)) // is now off of a ledge
+            if (down_is_valid(gs.board, gs.piece)) { // is now off of a ledge
                 goto piece_falling;
+            }
         }
         int rows_cleared = 0;
         clear_filled_rows(gs.board, &rows_cleared);
