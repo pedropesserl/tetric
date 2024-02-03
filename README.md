@@ -14,11 +14,13 @@ $ make
 
 Note: requires UTF-8 compatible terminal emulator; works best if the characters
 are exactly twice as tall as they are wide. Also, play on a terminal at least
-22 rows tall and 35 columns wide.
+22 rows tall and 37 columns wide.
 
 No keypress storage, hence no real fancy rotation system. Gameplay is similar
 to NES Tetris'. Soft drop is instantaneous too, the only difference to hard
 drop is that it doesn't lock the piece in place automatically.
+
+Highscore is kept in a file called "highscore", in the root directory.
 
 ### Controls:
 - `a` turn left

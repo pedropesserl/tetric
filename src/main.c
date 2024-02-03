@@ -7,6 +7,8 @@ int main() {
     int term_rows, term_cols;
     get_terminal_size(&term_rows, &term_cols);
 
+    const char *highscore_path = "highscore";
+
     srand(time(NULL));
     clock_t fall_control, fps_control;
     
@@ -36,9 +38,10 @@ int main() {
         gs.p_next = new_piece(rand() % 7 + 1);
         render_next(gs.p_next, gs.next_xy);
 
-        if (piece_board_collision(gs.board, gs.piece)) { // filled screen
+        if (piece_board_collision(gs.board, gs.piece)) { // filled screen, game over
             stamp_piece(gs.board, gs.piece);
             render_board(gs.board, gs.board_xy, gs.piece);
+            check_highscore(&gs, highscore_path);
             quit(&term_config, term_rows, term_cols);
         }
 

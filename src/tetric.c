@@ -377,3 +377,21 @@ void update_game_state(GameState *gs, int rows_cleared) {
         update_fall_time(&(gs->fall_time), gs->level);
     }
 }
+
+void check_highscore(GameState *gs, const char *highscore_path) {
+    FILE *highscore_file = fopen(highscore_path, "r+");
+    if (!highscore_file) {
+        highscore_file = fopen(highscore_path, "w+");
+    }
+    int curr_highscore;
+    fscanf(highscore_file, "%d", &curr_highscore);
+    if (gs->points <= curr_highscore) { // no new highscore
+        fclose(highscore_file);
+        return;
+    }
+    cursor_to(gs->points_xy.x + 1, gs->points_xy.y);
+    printf("NEW HIGHSCORE!");
+    rewind(highscore_file);
+    fprintf(highscore_file, "%d\n", gs->points);
+    fclose(highscore_file);
+}
