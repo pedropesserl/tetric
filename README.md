@@ -21,16 +21,16 @@ to NES Tetris'. Soft drop is instantaneous too, the only difference to hard
 drop is that it doesn't lock the piece in place automatically.
 
 ### Controls:
-- a turn left
-- d turn right
-- s turn 180
-- f hold
-- ← move left
-- → move right
-- ↓ soft drop
-- ␣ hard drop
-- 1 reset
-- ! quit
+- `a` turn left
+- `d` turn right
+- `s` turn 180
+- `f` hold
+- `←` move left
+- `→` move right
+- `↓` soft drop
+- `␣` hard drop
+- `1` reset
+- `!` quit
 
 ### Sources:
 - https://harddrop.com/wiki/Tetris_Wiki
