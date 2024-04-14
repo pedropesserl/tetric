@@ -3,4 +3,4 @@
     - choose true random or 7-bag
 - improve rotation system
     - wall kick
-- look into whether rendering everything to a buffer and then rendering the buffer for every frame could enhance performance
+- bake highscore into the executable so you can run it anywhere 
